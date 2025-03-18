@@ -4,12 +4,12 @@ using UnityEngine.SceneManagement;
 public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseMenuUI; // Référence au Canvas "MenuPause"
+    public Mouvement playerMovement; // Référence au script de mouvement du joueur
 
     private bool isPaused = false;
 
     void Start()
     {
-        // Désactiver le menu pause au démarrage
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
@@ -18,7 +18,6 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
-        // Détecter l'appui sur la touche "Escape" pour activer/désactiver la pause
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
@@ -34,42 +33,42 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
-        // Désactiver le menu pause
+        Debug.Log("Reprendre le jeu");
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
         }
-        // Reprendre le temps
-        Time.timeScale = 1f;
+        Time.timeScale = 1f; // Reprendre le temps
+        if (playerMovement != null)
+        {
+            playerMovement.SetPaused(false); // Réactiver le mouvement du joueur
+        }
         isPaused = false;
-        Debug.Log("Game is resumed");
     }
 
     void Pause()
     {
-        // Activer le menu pause
+        Debug.Log("Mettre le jeu en pause");
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(true);
         }
-        // Mettre le jeu en pause
-        Time.timeScale = 0f;
+        Time.timeScale = 0f; // Mettre le jeu en pause
+        if (playerMovement != null)
+        {
+            playerMovement.SetPaused(true); // Désactiver le mouvement du joueur
+        }
         isPaused = true;
-        Debug.Log("Game is paused");
     }
 
     public void LoadMenu()
     {
-        // Reprendre le temps avant de charger une nouvelle scène
         Time.timeScale = 1f;
-        // Charger la scène du menu principal (remplacez "MainMenu" par le nom de votre scène)
         SceneManager.LoadScene("MainMenu");
     }
 
     public void QuitGame()
     {
-        // Quitter l'application
         Application.Quit();
-        Debug.Log("Quitting game...");
     }
 }

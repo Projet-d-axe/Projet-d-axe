@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
-
-public class Mouvement : MonoBehaviour
+  public class Mouvement : MonoBehaviour
 {
     public float speed = 5f;
     public float jump = 8f;
@@ -18,6 +17,9 @@ public class Mouvement : MonoBehaviour
     private int jumpCount;
     public int maxJumpCount = 1;
 
+    // Gestion de la pause
+    private bool isPaused = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -29,6 +31,8 @@ public class Mouvement : MonoBehaviour
 
     void Update()
     {
+        if (isPaused) return; // Ne rien faire si le jeu est en pause
+
         groundCheck();
         moveCheck();
         flipCheck();
@@ -92,5 +96,15 @@ public class Mouvement : MonoBehaviour
             (Vector2)transform.position + Vector2.up * (monColl.offset.y + rayonDetection * 0.8f - (monColl.size.y / 2)),
             rayonDetection
         );
+    }
+
+    // Fonction pour gérer la pause
+    public void SetPaused(bool paused)
+    {
+        isPaused = paused;
+        if (isPaused)
+        {
+            rb.linearVelocity = Vector2.zero; // Arrêter le mouvement du joueur
+        }
     }
 }
