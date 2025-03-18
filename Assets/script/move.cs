@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
-  public class Mouvement : MonoBehaviour
+
+public class Mouvement : MonoBehaviour
 {
     public float speed = 5f;
     public float jump = 8f;
@@ -19,6 +20,7 @@ using UnityEngine;
 
     // Gestion de la pause
     private bool isPaused = false;
+    public CoinManager cm;
 
     void Start()
     {
@@ -105,6 +107,18 @@ using UnityEngine;
         if (isPaused)
         {
             rb.linearVelocity = Vector2.zero; // Arrêter le mouvement du joueur
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("coin")) // Vérifier si le joueur entre en collision avec une pièce
+        {
+            Destroy(other.gameObject); // Détruire la pièce
+            if (cm != null)
+            {
+                cm.CollectCoin(); // Appeler la méthode CollectCoin du CoinManager
+            }
         }
     }
 }
