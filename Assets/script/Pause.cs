@@ -3,7 +3,9 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
-    public GameObject pauseMenuUI; // Référence au Canvas "MenuPause"
+    public GameObject pauseMenuUI; // Référence au Canvas "PauseMenuUI"
+    public GameObject mainMenuUI; // Référence au Canvas "MainMenuUI"
+    public Mouvement playerMovement; // Référence au script de mouvement du joueur
 
     private bool isPaused = false;
 
@@ -13,6 +15,18 @@ public class PauseMenu : MonoBehaviour
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
+        }
+
+        // Activer le menu principal au démarrage
+        if (mainMenuUI != null)
+        {
+            mainMenuUI.SetActive(true);
+        }
+
+        // Désactiver le mouvement du joueur au démarrage
+        if (playerMovement != null)
+        {
+            playerMovement.SetPaused(true);
         }
     }
 
@@ -34,42 +48,71 @@ public class PauseMenu : MonoBehaviour
 
     public void Resume()
     {
-        // Désactiver le menu pause
+        Debug.Log("Reprendre le jeu");
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
         }
-        // Reprendre le temps
-        Time.timeScale = 1f;
+        Time.timeScale = 1f; // Reprendre le temps
+        if (playerMovement != null)
+        {
+            playerMovement.SetPaused(false); // Réactiver le mouvement du joueur
+        }
         isPaused = false;
-        Debug.Log("Game is resumed");
     }
 
     void Pause()
     {
-        // Activer le menu pause
+        Debug.Log("Mettre le jeu en pause");
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(true);
         }
-        // Mettre le jeu en pause
-        Time.timeScale = 0f;
+        Time.timeScale = 0f; // Mettre le jeu en pause
+        if (playerMovement != null)
+        {
+            playerMovement.SetPaused(true); // Désactiver le mouvement du joueur
+        }
         isPaused = true;
-        Debug.Log("Game is paused");
     }
 
-    public void LoadMenu()
+    // Fonction pour démarrer le jeu
+    public void PlayGame()
     {
-        // Reprendre le temps avant de charger une nouvelle scène
-        Time.timeScale = 1f;
-        // Charger la scène du menu principal (remplacez "MainMenu" par le nom de votre scène)
-        SceneManager.LoadScene("MainMenu");
+        Debug.Log("Démarrer le jeu");
+        if (mainMenuUI != null)
+        {
+            mainMenuUI.SetActive(false); // Désactiver le menu principal
+        }
+        if (playerMovement != null)
+        {
+            playerMovement.SetPaused(false); // Réactiver le mouvement du joueur
+        }
+        Time.timeScale = 1f; // Reprendre le temps
+    }
+
+    // Fonction pour retourner au menu principal
+    public void ReturnToMainMenu()
+    {
+        Debug.Log("Retour au menu principal");
+        if (mainMenuUI != null)
+        {
+            mainMenuUI.SetActive(true); // Activer le menu principal
+        }
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(false); // Désactiver le menu pause
+        }
+        if (playerMovement != null)
+        {
+            playerMovement.SetPaused(true); // Désactiver le mouvement du joueur
+        }
+        Time.timeScale = 0f; // Mettre le jeu en pause
     }
 
     public void QuitGame()
     {
-        // Quitter l'application
+        Debug.Log("Quitter le jeu");
         Application.Quit();
-        Debug.Log("Quitting game...");
     }
 }

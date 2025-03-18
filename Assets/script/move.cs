@@ -18,6 +18,10 @@ public class Mouvement : MonoBehaviour
     private int jumpCount;
     public int maxJumpCount = 1;
 
+    // Gestion de la pause
+    private bool isPaused = false;
+    public CoinManager cm;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -29,6 +33,8 @@ public class Mouvement : MonoBehaviour
 
     void Update()
     {
+        if (isPaused) return; // Ne rien faire si le jeu est en pause
+
         groundCheck();
         moveCheck();
         flipCheck();
@@ -92,5 +98,27 @@ public class Mouvement : MonoBehaviour
             (Vector2)transform.position + Vector2.up * (monColl.offset.y + rayonDetection * 0.8f - (monColl.size.y / 2)),
             rayonDetection
         );
+    }
+
+    // Fonction pour gérer la pause
+    public void SetPaused(bool paused)
+    {
+        isPaused = paused;
+        if (isPaused)
+        {
+            rb.linearVelocity = Vector2.zero; // Arrêter le mouvement du joueur
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("coin")) // Vérifier si le joueur entre en collision avec une pièce
+        {
+            Destroy(other.gameObject); // Détruire la pièce
+            if (cm != null)
+            {
+                cm.CollectCoin(); // Appeler la méthode CollectCoin du CoinManager
+            }
+        }
     }
 }
