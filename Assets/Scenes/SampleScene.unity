@@ -933,7 +933,7 @@ MonoBehaviour:
   currentXP: 0
   currentLevel: 1
   skillPoints: 0
-  xpGainRate: 10
+  xpGainRate: 20
   xpBar: {fileID: 93338687}
   levelText: {fileID: 1116937702}
   skillPointsText: {fileID: 399055210}
