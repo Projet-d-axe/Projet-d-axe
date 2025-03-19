@@ -15,7 +15,7 @@ public class Mouvement : MonoBehaviour
     public int maxJumpCount = 1;
     private bool isPaused = false;
     public CoinManager cm;
-    public ManaSystem manaSystem;
+    public XPSystem xpSystem;
 
     void Start()
     {
@@ -30,7 +30,7 @@ public class Mouvement : MonoBehaviour
         anim = GetComponent<Animator>();
         jumpCount = 0;
 
-        if (manaSystem == null)
+        if (xpSystem == null)
         {
             Debug.LogError("manaSystem n'est pas assigné !");
         }
@@ -50,22 +50,12 @@ public class Mouvement : MonoBehaviour
             Debug.Log("Touche M pressée");
 
             // Vérifie si manaSystem est assigné
-            if (manaSystem == null)
+            if (xpSystem == null)
             {
                 Debug.LogError("manaSystem n'est pas assigné !");
                 return;
             }
 
-            // Vérifie s'il y a assez de mana
-            if (manaSystem.currentMana >= 20)
-            {
-                Debug.Log("Mana utilisé");
-                manaSystem.UseMana(20); // Utiliser 20 points de mana
-            }
-            else
-            {
-                Debug.Log("Pas assez de mana");
-            }
         }
 
         // Autres fonctions de mouvement
