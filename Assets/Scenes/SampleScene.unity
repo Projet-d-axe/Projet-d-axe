@@ -285,7 +285,11 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
+<<<<<<< Enzo-Game-Prog
+  m_AnchoredPosition: {x: -225.55, y: 230.62}
+=======
   m_AnchoredPosition: {x: -190.54, y: 181.53}
+>>>>>>> main
   m_SizeDelta: {x: 418.91, y: 26.74}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &184800816
@@ -937,6 +941,10 @@ MonoBehaviour:
   xpBar: {fileID: 93338687}
   levelText: {fileID: 1116937702}
   skillPointsText: {fileID: 399055210}
+<<<<<<< Enzo-Game-Prog
+  maxXP: 0
+=======
+>>>>>>> main
 --- !u!1 &378378298
 GameObject:
   m_ObjectHideFlags: 0
