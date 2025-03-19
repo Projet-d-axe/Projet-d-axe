@@ -54,7 +54,7 @@ public class Mouvement : MonoBehaviour
             {
                 Debug.LogError("manaSystem n'est pas assigné !");
                 return;
-            }
+           }
 
         }
 
