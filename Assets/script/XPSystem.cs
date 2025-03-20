@@ -12,8 +12,16 @@ public class XPSystem : MonoBehaviour
     public Slider xpBar; // Référence à la barre d'XP UI
     public Text levelText; // Référence au texte du niveau UI
     public Text skillPointsText; // Référence au texte des points de compétences UI
+    public Text strengthText; // Référence au texte de la force UI
+    public Text agilityText; // Référence au texte de l'agilité UI
+    public Text fireRateText; // Référence au texte de la vitesse de tir UI
 
     private float maxXP; // XP nécessaire pour le niveau actuel
+
+    // Statistiques du joueur
+    public int strength = 0;
+    public int agility = 0;
+    public float fireRate = 1.0f; // Vitesse de tir (remplace Intelligence)
 
     void Start()
     {
@@ -59,21 +67,38 @@ public class XPSystem : MonoBehaviour
         UpdateUI(); // Met à jour l'interface utilisateur
     }
 
-    // Méthode pour utiliser un point de compétence
-    public void UseSkillPoint()
+    // Méthodes pour attribuer des points de stats
+    public void AddStrength()
     {
         if (skillPoints > 0)
         {
+            strength++;
             skillPoints--;
-            Debug.Log("Point de compétence utilisé. Points restants : " + skillPoints);
-            // Ajoutez ici la logique pour améliorer les compétences du joueur
+            Debug.Log("Force augmentée ! Force actuelle : " + strength);
+            UpdateUI();
         }
-        else
-        {
-            Debug.Log("Pas de points de compétence disponibles !");
-        }
+    }
 
-        UpdateUI(); // Met à jour l'interface utilisateur
+    public void AddAgility()
+    {
+        if (skillPoints > 0)
+        {
+            agility++;
+            skillPoints--;
+            Debug.Log("Agilité augmentée ! Agilité actuelle : " + agility);
+            UpdateUI();
+        }
+    }
+
+    public void AddFireRate() // Remplace Intelligence par Vitesse de tir
+    {
+        if (skillPoints > 0)
+        {
+            fireRate += 0.1f; // Augmente la vitesse de tir de 0.1
+            skillPoints--;
+            Debug.Log("Vitesse de tir augmentée ! Vitesse de tir actuelle : " + fireRate);
+            UpdateUI();
+        }
     }
 
     // Met à jour l'interface utilisateur
@@ -95,6 +120,20 @@ public class XPSystem : MonoBehaviour
         if (skillPointsText != null)
         {
             skillPointsText.text = "Points de compétence : " + skillPoints;
+        }
+
+        // Met à jour les statistiques
+        if (strengthText != null)
+        {
+            strengthText.text = "Force : " + strength;
+        }
+        if (agilityText != null)
+        {
+            agilityText.text = "Agilité : " + agility;
+        }
+        if (fireRateText != null)
+        {
+            fireRateText.text = "Vitesse de tir : " + fireRate.ToString("F1"); // Affiche 1 chiffre après la virgule
         }
     }
 }
