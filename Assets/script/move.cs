@@ -6,6 +6,7 @@ public class move : MonoBehaviour
     public float jump = 8f;
     public int maxJumpCount = 1;
     public float dashSpeed = 20f; // Vitesse fixe pour le dash
+    public float dashDuration = 0.2f; // Durée du dash
     public float dashCooldown = 1f; // Temps de recharge du dash
     private Rigidbody2D rb;
     private CapsuleCollider2D monColl;
@@ -16,6 +17,7 @@ public class move : MonoBehaviour
     private int jumpCount;
     private Vector3 monScale;
     private float lastDashTime = -Mathf.Infinity; // Temps du dernier dash
+    private bool isDashing = false; // Indique si le joueur est en train de dash
 
     void Start()
     {
@@ -28,11 +30,14 @@ public class move : MonoBehaviour
 
     void Update()
     {
+        if (!isDashing) // Empêche les autres mouvements pendant le dash
+        {
+            groundCheck();
+            moveCheck();
+            flipCheck();
+            animCheck();
+        }
         dashCheck();
-        groundCheck();
-        moveCheck();
-        flipCheck();
-        animCheck();
     }
 
     void groundCheck()
@@ -55,33 +60,42 @@ public class move : MonoBehaviour
     }
 
     void moveCheck()
-{
-    float moveInput = Input.GetAxis("Horizontal");
-    rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y); // Use rb.velocity
-
-    if (Input.GetButtonDown("Jump") && (grounded || jumpCount < maxJumpCount))
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump); // Apply jump velocity
-        jumpCount++;
-        Debug.Log("Jump performed. Remaining jumps: " + (maxJumpCount - jumpCount));
+        float moveInput = Input.GetAxis("Horizontal");
+        rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y); // Utilise rb.velocity
+
+        if (Input.GetButtonDown("Jump") && (grounded || jumpCount < maxJumpCount))
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump); // Applique la vitesse du saut
+            jumpCount++;
+            Debug.Log("Jump performed. Remaining jumps: " + (maxJumpCount - jumpCount));
+        }
     }
-}
 
     void dashCheck()
     {
-    if ((Input.GetKeyDown(KeyCode.LeftShift)) && (Time.time >= lastDashTime + dashCooldown))
-    {
-        float direction = Mathf.Sign(rb.linearVelocity.x); // Current direction of the player
-        if (direction == 0) direction = 1; // Default to dash right if the player is stationary
-        rb.linearVelocity = new Vector2(dashSpeed * direction, rb.linearVelocity.y); // Apply dash
-        lastDashTime = Time.time; // Record the time of the last dash
-        Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !isDashing && (Time.time >= lastDashTime + dashCooldown))
+        {
+            float direction = Input.GetAxis("Horizontal"); // Direction actuelle du joueur
+            if (direction == 0) direction = 1; // Par défaut, dash vers la droite si le joueur est immobile
+
+            StartCoroutine(PerformDash(direction)); // Démarre le dash
+        }
     }
-        else if (Input.GetKeyDown(KeyCode.LeftShift))
+
+    private System.Collections.IEnumerator PerformDash(float direction)
     {
-        Debug.Log("Dash on cooldown. Time remaining: " + (lastDashTime + dashCooldown - Time.time));
-    }
-    Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
+        isDashing = true; // Active le dash
+        lastDashTime = Time.time; // Enregistre le temps du dernier dash
+
+        float startTime = Time.time;
+        while (Time.time < startTime + dashDuration)
+        {
+            rb.linearVelocity = new Vector2(dashSpeed * direction, rb.linearVelocity.y); // Applique la vitesse du dash
+            yield return null; // Attend la prochaine frame
+        }
+
+        isDashing = false; // Désactive le dash
     }
 
     private void flipCheck()
@@ -111,7 +125,8 @@ public class move : MonoBehaviour
             rayonDetection
         );
     }
-     private void OnGUI()
+
+    private void OnGUI()
     {
         GUILayout.BeginVertical(GUI.skin.box);
         GUILayout.Label(gameObject.name);
@@ -123,6 +138,5 @@ public class move : MonoBehaviour
         GUILayout.Label($"Grounded = {grounded}");
         GUILayout.Label($"keydash = {Input.GetKeyDown(KeyCode.LeftShift)}");
         GUILayout.EndVertical();
-
     }
 }
