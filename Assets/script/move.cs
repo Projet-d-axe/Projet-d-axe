@@ -5,7 +5,6 @@ public class Mouvement : MonoBehaviour
     public float speed = 5f;
     public float jump = 8f;
     private Rigidbody2D rb;
-    private Collider2D[] colls;
     private CapsuleCollider2D monColl;
     private bool grounded;
     private float rayonDetection;
@@ -13,63 +12,33 @@ public class Mouvement : MonoBehaviour
     private Animator anim;
     private int jumpCount;
     public int maxJumpCount = 1;
-    private bool isPaused = false;
-    public CoinManager cm;
-    public XPSystem xpSystem;
+    private Vector3 monScale;
+    public float dash = 10f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        if (rb == null)
-        {
-            Debug.LogError("Rigidbody2D non trouvé sur l'objet !");
-        }
-
         monColl = GetComponent<CapsuleCollider2D>();
         skin = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
-        jumpCount = 0;
-
-        if (xpSystem == null)
-        {
-            Debug.LogError("manaSystem n'est pas assigné !");
-        }
+        monScale = transform.localScale; // Initialiser l'échelle d'origine
     }
 
     void Update()
     {
-        if (isPaused)
-        {
-            Debug.Log("Le jeu est en pause");
-            return;
-        }
-
-        // Vérifie si la touche M est pressée
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            Debug.Log("Touche M pressée");
-
-            // Vérifie si manaSystem est assigné
-            if (xpSystem == null)
-            {
-                Debug.LogError("manaSystem n'est pas assigné !");
-                return;
-           }
-
-        }
-
-        // Autres fonctions de mouvement
+        
         groundCheck();
         moveCheck();
         flipCheck();
         animCheck();
+        dashCheck();
     }
 
     void groundCheck()
     {
         grounded = false;
         rayonDetection = monColl.size.x * 0.45f;
-        colls = Physics2D.OverlapCircleAll(
+        Collider2D[] colls = Physics2D.OverlapCircleAll(
             (Vector2)transform.position + Vector2.up * (monColl.offset.y + rayonDetection * 0.8f - (monColl.size.y / 2)),
             rayonDetection
         );
@@ -84,22 +53,33 @@ public class Mouvement : MonoBehaviour
         }
     }
 
-    void moveCheck()
+   void moveCheck()
+{
+    float moveInput = Input.GetAxis("Horizontal");
+    rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y); // Utilisez rb.velocity au lieu de rb.linearVelocity
+
+    if (Input.GetButtonDown("Jump") && (grounded || jumpCount < maxJumpCount))
     {
-        rb.linearVelocity = new Vector2(Input.GetAxis("Horizontal") * speed, rb.linearVelocity.y);
-        if (Input.GetButtonDown("Jump") && (grounded || jumpCount < maxJumpCount))
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump);
-            jumpCount++;
-        }
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump); // Appliquer la vitesse de saut
+        jumpCount++;
     }
+}
+
+void dashCheck()
+{
+    if (Input.GetKeyDown(KeyCode.M))
+    {
+        float dashSpeed = 20f; // Vitesse fixe pour le dash
+        rb.linearVelocity = new Vector2(dashSpeed * Mathf.Sign(rb.linearVelocity.x), rb.linearVelocity.y); // Conserve la direction actuelle
+    }
+}
 
     private void flipCheck()
     {
         if (Input.GetAxis("Horizontal") < 0)
-            skin.flipX = true;
+            transform.localScale = new Vector3(-Mathf.Abs(monScale.x), monScale.y, monScale.z); // Inversion sûre
         else if (Input.GetAxis("Horizontal") > 0)
-            skin.flipX = false;
+            transform.localScale = monScale; // Rétablir l'échelle d'origine
     }
 
     private void animCheck()
@@ -108,35 +88,17 @@ public class Mouvement : MonoBehaviour
         anim.SetFloat("velocityY", rb.linearVelocity.y);
         anim.SetBool("grounded", grounded);
     }
-
-    private void OnDrawGizmos()
+    private void OnGUI()
     {
-        if (monColl == null)
-            monColl = GetComponent<CapsuleCollider2D>();
-        rayonDetection = monColl.size.x * 0.45f;
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(
-            (Vector2)transform.position + Vector2.up * (monColl.offset.y + rayonDetection * 0.8f - (monColl.size.y / 2)),
-            rayonDetection
-        );
-    }
+        GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.Label(gameObject.name);
+        GUILayout.Label($"Jump = {jump}");
+        GUILayout.Label($"Jump = {jumpCount}");
+        GUILayout.Label($"Speed = {speed}");
+        GUILayout.Label($"dash = {dash}");
+        GUILayout.Label($"Grounded = {grounded}");
+        GUILayout.Label($"keydash = {Input.GetKeyDown(KeyCode.M)}");
+        GUILayout.EndVertical();
 
-    public void SetPaused(bool paused)
-    {
-        isPaused = paused;
-        if (isPaused && rb != null)
-        {
-            rb.linearVelocity = Vector2.zero; // Arrête le mouvement
-        }
-        Debug.Log("Jeu en pause : " + paused);
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("coin") && cm != null)
-        {
-            Destroy(other.gameObject);
-            cm.CollectCoin();
-        }
     }
 }
