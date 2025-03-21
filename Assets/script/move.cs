@@ -1,9 +1,13 @@
 using UnityEngine;
 
-public class Mouvement : MonoBehaviour
+public class move : MonoBehaviour
 {
     public float speed = 5f;
     public float jump = 8f;
+    public int maxJumpCount = 1;
+    public float dashSpeed = 20f; // Vitesse fixe pour le dash
+    public float dashCooldown = 1f; // Temps de recharge du dash
+
     private Rigidbody2D rb;
     private CapsuleCollider2D monColl;
     private bool grounded;
@@ -11,9 +15,8 @@ public class Mouvement : MonoBehaviour
     private SpriteRenderer skin;
     private Animator anim;
     private int jumpCount;
-    public int maxJumpCount = 1;
     private Vector3 monScale;
-    public float dash = 10f;
+    private float lastDashTime = -Mathf.Infinity; // Temps du dernier dash
 
     void Start()
     {
@@ -26,7 +29,6 @@ public class Mouvement : MonoBehaviour
 
     void Update()
     {
-        
         groundCheck();
         moveCheck();
         flipCheck();
@@ -53,26 +55,35 @@ public class Mouvement : MonoBehaviour
         }
     }
 
-   void moveCheck()
+    void moveCheck()
 {
     float moveInput = Input.GetAxis("Horizontal");
-    rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y); // Utilisez rb.velocity au lieu de rb.linearVelocity
+    rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y); // Use rb.velocity
 
     if (Input.GetButtonDown("Jump") && (grounded || jumpCount < maxJumpCount))
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump); // Appliquer la vitesse de saut
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump); // Apply jump velocity
         jumpCount++;
+        Debug.Log("Jump performed. Remaining jumps: " + (maxJumpCount - jumpCount));
     }
 }
 
-void dashCheck()
-{
-    if (Input.GetKeyDown(KeyCode.M))
+    void dashCheck()
     {
-        float dashSpeed = 20f; // Vitesse fixe pour le dash
-        rb.linearVelocity = new Vector2(dashSpeed * Mathf.Sign(rb.linearVelocity.x), rb.linearVelocity.y); // Conserve la direction actuelle
+    if ((Input.GetKeyDown(KeyCode.LeftShift)) && (Time.time >= lastDashTime + dashCooldown))
+    {
+        float direction = Mathf.Sign(rb.linearVelocity.x); // Current direction of the player
+        if (direction == 0) direction = 1; // Default to dash right if the player is stationary
+        rb.linearVelocity = new Vector2(dashSpeed * direction, rb.linearVelocity.y); // Apply dash
+        lastDashTime = Time.time; // Record the time of the last dash
+        Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
     }
-}
+        else if (Input.GetKeyDown(KeyCode.LeftShift))
+    {
+        Debug.Log("Dash on cooldown. Time remaining: " + (lastDashTime + dashCooldown - Time.time));
+    }
+    Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
+    }
 
     private void flipCheck()
     {
@@ -88,16 +99,30 @@ void dashCheck()
         anim.SetFloat("velocityY", rb.linearVelocity.y);
         anim.SetBool("grounded", grounded);
     }
-    private void OnGUI()
+
+    private void OnDrawGizmos()
+    {
+        if (monColl == null)
+            monColl = GetComponent<CapsuleCollider2D>();
+
+        rayonDetection = monColl.size.x * 0.45f;
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(
+            (Vector2)transform.position + Vector2.up * (monColl.offset.y + rayonDetection * 0.8f - (monColl.size.y / 2)),
+            rayonDetection
+        );
+    }
+     private void OnGUI()
     {
         GUILayout.BeginVertical(GUI.skin.box);
         GUILayout.Label(gameObject.name);
         GUILayout.Label($"Jump = {jump}");
         GUILayout.Label($"Jump = {jumpCount}");
         GUILayout.Label($"Speed = {speed}");
-        GUILayout.Label($"dash = {dash}");
+        GUILayout.Label($"dash = {dashSpeed}");
+        GUILayout.Label($"dashCooldown = {dashCooldown}");
         GUILayout.Label($"Grounded = {grounded}");
-        GUILayout.Label($"keydash = {Input.GetKeyDown(KeyCode.M)}");
+        GUILayout.Label($"keydash = {Input.GetKeyDown(KeyCode.LeftShift)}");
         GUILayout.EndVertical();
 
     }
