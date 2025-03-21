@@ -7,7 +7,6 @@ public class move : MonoBehaviour
     public int maxJumpCount = 1;
     public float dashSpeed = 20f; // Vitesse fixe pour le dash
     public float dashCooldown = 1f; // Temps de recharge du dash
-
     private Rigidbody2D rb;
     private CapsuleCollider2D monColl;
     private bool grounded;
@@ -29,11 +28,11 @@ public class move : MonoBehaviour
 
     void Update()
     {
+        dashCheck();
         groundCheck();
         moveCheck();
         flipCheck();
         animCheck();
-        dashCheck();
     }
 
     void groundCheck()
@@ -74,15 +73,15 @@ public class move : MonoBehaviour
     {
         float direction = Mathf.Sign(rb.linearVelocity.x); // Current direction of the player
         if (direction == 0) direction = 1; // Default to dash right if the player is stationary
-        rb.velocity = new Vector2(dashSpeed * direction, rb.velocity.y); // Apply dash
+        rb.linearVelocity = new Vector2(dashSpeed * direction, rb.linearVelocity.y); // Apply dash
         lastDashTime = Time.time; // Record the time of the last dash
-        Debug.Log("Dash performed. Speed: " + rb.velocity);
+        Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
     }
         else if (Input.GetKeyDown(KeyCode.LeftShift))
     {
         Debug.Log("Dash on cooldown. Time remaining: " + (lastDashTime + dashCooldown - Time.time));
     }
-    Debug.Log("Dash performed. Speed: " + rb.velocity);
+    Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
     }
 
     private void flipCheck()
