@@ -74,15 +74,15 @@ public class move : MonoBehaviour
     {
         float direction = Mathf.Sign(rb.linearVelocity.x); // Current direction of the player
         if (direction == 0) direction = 1; // Default to dash right if the player is stationary
-        rb.linearVelocity = new Vector2(dashSpeed * direction, rb.linearVelocity.y); // Apply dash
+        rb.velocity = new Vector2(dashSpeed * direction, rb.velocity.y); // Apply dash
         lastDashTime = Time.time; // Record the time of the last dash
-        Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
+        Debug.Log("Dash performed. Speed: " + rb.velocity);
     }
         else if (Input.GetKeyDown(KeyCode.LeftShift))
     {
         Debug.Log("Dash on cooldown. Time remaining: " + (lastDashTime + dashCooldown - Time.time));
     }
-    Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
+    Debug.Log("Dash performed. Speed: " + rb.velocity);
     }
 
     private void flipCheck()
