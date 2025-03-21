@@ -8,6 +8,7 @@ public class move : MonoBehaviour
     public float dashSpeed = 20f; // Vitesse fixe pour le dash
     public float dashDuration = 0.2f; // Durée du dash
     public float dashCooldown = 1f; // Temps de recharge du dash
+    public float crouchSpeedMultiplier = 0.5f; // Multiplicateur de vitesse en accroupi
     private Rigidbody2D rb;
     private CapsuleCollider2D monColl;
     private bool grounded;
@@ -18,6 +19,7 @@ public class move : MonoBehaviour
     private Vector3 monScale;
     private float lastDashTime = -Mathf.Infinity; // Temps du dernier dash
     private bool isDashing = false; // Indique si le joueur est en train de dash
+    private bool isCrouching = false; // Indique si le joueur est accroupi
 
     void Start()
     {
@@ -36,6 +38,7 @@ public class move : MonoBehaviour
             moveCheck();
             flipCheck();
             animCheck();
+            crouchCheck(); // Vérifie l'état de l'accroupissement
         }
         dashCheck();
     }
@@ -62,13 +65,29 @@ public class move : MonoBehaviour
     void moveCheck()
     {
         float moveInput = Input.GetAxis("Horizontal");
-        rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y); // Utilise rb.velocity
+
+        // Applique le multiplicateur de vitesse si le joueur est accroupi
+        float currentSpeed = isCrouching ? speed * crouchSpeedMultiplier : speed;
+
+        rb.linearVelocity = new Vector2(moveInput * currentSpeed, rb.linearVelocity.y);
 
         if (Input.GetButtonDown("Jump") && (grounded || jumpCount < maxJumpCount))
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump); // Applique la vitesse du saut
             jumpCount++;
             Debug.Log("Jump performed. Remaining jumps: " + (maxJumpCount - jumpCount));
+        }
+    }
+
+    void crouchCheck()
+    {
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.LeftControl)) // Touche pour s'accroupir
+        {
+            isCrouching = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.LeftControl)) // Touche pour se relever
+        {
+            isCrouching = false;
         }
     }
 
@@ -111,6 +130,7 @@ public class move : MonoBehaviour
         anim.SetFloat("velocityX", Mathf.Abs(rb.linearVelocity.x));
         anim.SetFloat("velocityY", rb.linearVelocity.y);
         anim.SetBool("grounded", grounded);
+        anim.SetBool("isCrouching", isCrouching); // Ajoutez un paramètre "isCrouching" dans votre Animator
     }
 
     private void OnDrawGizmos()
@@ -137,6 +157,7 @@ public class move : MonoBehaviour
         GUILayout.Label($"dashCooldown = {dashCooldown}");
         GUILayout.Label($"Grounded = {grounded}");
         GUILayout.Label($"keydash = {Input.GetKeyDown(KeyCode.LeftShift)}");
+        GUILayout.Label($"isCrouching = {isCrouching}");
         GUILayout.EndVertical();
     }
 }
