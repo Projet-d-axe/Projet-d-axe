@@ -2983,6 +2983,7 @@ MonoBehaviour:
   dashSpeed: 20
   dashDuration: 0.5
   dashCooldown: 1
+  crouchSpeedMultiplier: 0.5
 --- !u!95 &2122821550
 Animator:
   serializedVersion: 7
