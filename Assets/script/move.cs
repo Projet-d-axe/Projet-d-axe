@@ -7,6 +7,10 @@ public class move : MonoBehaviour
     public int maxJumpCount = 1;
     public float dashSpeed = 20f; // Vitesse fixe pour le dash
     public float dashCooldown = 1f; // Temps de recharge du dash
+    public float fireRate = 0.5f; // Cadence de tir
+    public GameObject bulletPrefab; // Préfabriqué de la balle
+    public Transform bulletSpawn; // Point de spawn de la balle
+    public float bulletSpeed = 10f; // Vitesse de la balle
     private Rigidbody2D rb;
     private CapsuleCollider2D monColl;
     private bool grounded;
@@ -28,6 +32,7 @@ public class move : MonoBehaviour
 
     void Update()
     {
+        FireRate();
         dashCheck();
         groundCheck();
         moveCheck();
@@ -66,6 +71,16 @@ public class move : MonoBehaviour
         Debug.Log("Jump performed. Remaining jumps: " + (maxJumpCount - jumpCount));
     }
 }
+
+    void FireRate()
+    {
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
+            Rigidbody2D rbBullet = bullet.GetComponent<Rigidbody2D>();
+            rbBullet.AddForce(bulletSpawn.right * bulletSpeed, ForceMode2D.Impulse);
+        }
+    }
 
     void dashCheck()
     {
