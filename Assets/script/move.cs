@@ -1,143 +1,144 @@
 using UnityEngine;
 
-public class move : MonoBehaviour
+[RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D), typeof(Animator))]
+public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 5f;
-    public float jump = 8f;
-    public int maxJumpCount = 1;
-    public float dashSpeed = 20f; // Vitesse fixe pour le dash
-    public float dashCooldown = 1f; // Temps de recharge du dash
-    public float fireRate = 0.5f; // Cadence de tir
-    public GameObject bulletPrefab; // Préfabriqué de la balle
-    public Transform bulletSpawn; // Point de spawn de la balle
-    public float bulletSpeed = 10f; // Vitesse de la balle
-    private Rigidbody2D rb;
-    private CapsuleCollider2D monColl;
-    private bool grounded;
-    private float rayonDetection;
-    private SpriteRenderer skin;
-    private Animator anim;
-    private int jumpCount;
-    private Vector3 monScale;
-    private float lastDashTime = -Mathf.Infinity; // Temps du dernier dash
+    [Header("Movement")]
+    public float speed = 8f;
+    public float acceleration = 15f;
+    public float deceleration = 20f;
 
-    void Start()
+    [Header("Jump")]
+    public float jumpForce = 12f;
+    public int maxJumps = 1;
+    public float coyoteTime = 0.1f;
+    public float jumpBufferTime = 0.1f;
+
+    [Header("Dash")]
+    public float dashSpeed = 25f;
+    public float dashDuration = 0.2f;
+    public float dashCooldown = 1f;
+
+    // Components
+    private Rigidbody2D rb;
+    private Animator anim;
+    private bool isFacingRight = true;
+
+    // State
+    private bool isGrounded;
+    private bool isDashing;
+    private int jumpCount;
+    private float lastGroundedTime;
+    private float lastJumpPressTime;
+    private float lastDashTime;
+
+    void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        monColl = GetComponent<CapsuleCollider2D>();
-        skin = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
-        monScale = transform.localScale; // Initialiser l'échelle d'origine
     }
 
     void Update()
     {
-        FireRate();
-        dashCheck();
-        groundCheck();
-        moveCheck();
-        flipCheck();
-        animCheck();
+        HandleJumpInput();
+        HandleDashInput();
+        UpdateTimers();
+        UpdateAnimations();
     }
 
-    void groundCheck()
+    void FixedUpdate()
     {
-        grounded = false;
-        rayonDetection = monColl.size.x * 0.45f;
-        Collider2D[] colls = Physics2D.OverlapCircleAll(
-            (Vector2)transform.position + Vector2.up * (monColl.offset.y + rayonDetection * 0.8f - (monColl.size.y / 2)),
-            rayonDetection
-        );
-        foreach (Collider2D coll in colls)
+        GroundCheck();
+        if (!isDashing) HandleMovement();
+    }
+
+    private void HandleMovement()
+    {
+        float targetSpeed = Input.GetAxisRaw("Horizontal") * speed;
+        float speedDiff = targetSpeed - rb.linearVelocity.x;
+        float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? acceleration : deceleration;
+        rb.AddForce(Vector2.right * speedDiff * accelRate);
+
+        // Flip sprite
+        if (targetSpeed > 0 && !isFacingRight) Flip();
+        else if (targetSpeed < 0 && isFacingRight) Flip();
+    }
+
+    private void HandleJumpInput()
+    {
+        if (Input.GetButtonDown("Jump"))
         {
-            if (coll != monColl && !coll.isTrigger)
-            {
-                grounded = true;
-                jumpCount = 0;
-                break;
-            }
+            lastJumpPressTime = Time.time;
+            TryJump();
         }
     }
 
-    void moveCheck()
-{
-    float moveInput = Input.GetAxis("Horizontal");
-    rb.linearVelocity = new Vector2(moveInput * speed, rb.linearVelocity.y); // Use rb.velocity
-
-    if (Input.GetButtonDown("Jump") && (grounded || jumpCount < maxJumpCount))
+    private void TryJump()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jump); // Apply jump velocity
-        jumpCount++;
-        Debug.Log("Jump performed. Remaining jumps: " + (maxJumpCount - jumpCount));
-    }
-}
+        bool canCoyoteJump = Time.time - lastGroundedTime <= coyoteTime;
+        bool hasJumpBuffer = Time.time - lastJumpPressTime <= jumpBufferTime;
 
-    void FireRate()
-    {
-        if (Input.GetKeyDown(KeyCode.X))
+        if ((isGrounded || canCoyoteJump || jumpCount < maxJumps) && hasJumpBuffer)
         {
-            GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, bulletSpawn.rotation);
-            Rigidbody2D rbBullet = bullet.GetComponent<Rigidbody2D>();
-            rbBullet.AddForce(bulletSpawn.right * bulletSpeed, ForceMode2D.Impulse);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            jumpCount++;
+            lastJumpPressTime = float.MinValue;
         }
     }
 
-    void dashCheck()
+    private void HandleDashInput()
     {
-    if ((Input.GetKeyDown(KeyCode.LeftShift)) && (Time.time >= lastDashTime + dashCooldown))
-    {
-        float direction = Mathf.Sign(rb.linearVelocity.x); // Current direction of the player
-        if (direction == 0) direction = 1; // Default to dash right if the player is stationary
-        rb.linearVelocity = new Vector2(dashSpeed * direction, rb.linearVelocity.y); // Apply dash
-        lastDashTime = Time.time; // Record the time of the last dash
-        Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
-    }
-        else if (Input.GetKeyDown(KeyCode.LeftShift))
-    {
-        Debug.Log("Dash on cooldown. Time remaining: " + (lastDashTime + dashCooldown - Time.time));
-    }
-    Debug.Log("Dash performed. Speed: " + rb.linearVelocity);
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= lastDashTime + dashCooldown)
+        {
+            StartDash();
+        }
     }
 
-    private void flipCheck()
+    private void StartDash()
     {
-        if (Input.GetAxis("Horizontal") < 0)
-            transform.localScale = new Vector3(-Mathf.Abs(monScale.x), monScale.y, monScale.z); // Inversion sûre
-        else if (Input.GetAxis("Horizontal") > 0)
-            transform.localScale = monScale; // Rétablir l'échelle d'origine
+        isDashing = true;
+        lastDashTime = Time.time;
+        rb.linearVelocity = new Vector2((isFacingRight ? 1 : -1) * dashSpeed, 0);
+        Invoke(nameof(StopDash), dashDuration);
     }
 
-    private void animCheck()
+    private void StopDash() => isDashing = false;
+
+    private void GroundCheck()
     {
-        anim.SetFloat("velocityX", Mathf.Abs(rb.linearVelocity.x));
-        anim.SetFloat("velocityY", rb.linearVelocity.y);
-        anim.SetBool("grounded", grounded);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.1f);
+        isGrounded = hit.collider != null;
+
+        if (isGrounded)
+        {
+            lastGroundedTime = Time.time;
+            jumpCount = 0;
+        }
     }
 
-    private void OnDrawGizmos()
+    private void UpdateTimers()
     {
-        if (monColl == null)
-            monColl = GetComponent<CapsuleCollider2D>();
-
-        rayonDetection = monColl.size.x * 0.45f;
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(
-            (Vector2)transform.position + Vector2.up * (monColl.offset.y + rayonDetection * 0.8f - (monColl.size.y / 2)),
-            rayonDetection
-        );
+        // Reset dash when grounded
+        if (isGrounded && Time.time >= lastDashTime + dashCooldown)
+        {
+            isDashing = false;
+        }
     }
-     private void OnGUI()
+
+    private void UpdateAnimations()
     {
-        GUILayout.BeginVertical(GUI.skin.box);
-        GUILayout.Label(gameObject.name);
-        GUILayout.Label($"Jump = {jump}");
-        GUILayout.Label($"Jump = {jumpCount}");
-        GUILayout.Label($"Speed = {speed}");
-        GUILayout.Label($"dash = {dashSpeed}");
-        GUILayout.Label($"dashCooldown = {dashCooldown}");
-        GUILayout.Label($"Grounded = {grounded}");
-        GUILayout.Label($"keydash = {Input.GetKeyDown(KeyCode.LeftShift)}");
-        GUILayout.EndVertical();
-
+        anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
+        anim.SetBool("IsGrounded", isGrounded);
+        anim.SetBool("IsDashing", isDashing);
     }
+
+    private void Flip()
+    {
+        isFacingRight = !isFacingRight;
+        transform.Rotate(0f, 180f, 0f);
+    }
+
+    // Public method for weapon knockback
+    public void ApplyKnockback(Vector2 force) => rb.AddForce(force, ForceMode2D.Impulse);
 }

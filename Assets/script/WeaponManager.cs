@@ -45,8 +45,6 @@ public class WeaponManager : MonoBehaviour
         // Vous pouvez ajouter ici la logique spécifique pour chaque arme (ex : instancier une balle, jouer un son, etc.)
     }
 
-    
-
     void SwitchWeapon(int newIndex)
     {
         // Désactiver l'arme actuelle
