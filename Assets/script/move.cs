@@ -1,254 +1,382 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D), typeof(Animator))]
-public class PlayerController2D : MonoBehaviour
+public class AdvancedMovement : MonoBehaviour
 {
-    // MOVEMENT
-    [Header("MOVEMENT")]
-    [SerializeField] private float moveSpeed = 8f;
-    [SerializeField] private float acceleration = 15f;
-    [SerializeField] private float deceleration = 20f;
-    [Range(0f, 1f)] [SerializeField] private float airControl = 0.5f;
-    [SerializeField] private float groundCheckRadius = 0.2f;
-    [SerializeField] private LayerMask groundLayer;
-
-    // JUMP
-    [Header("JUMP")]
-    [SerializeField] private float jumpForce = 12f;
-    [SerializeField] private int maxJumps = 1;
-    [SerializeField] private float coyoteTime = 0.1f;
-    [SerializeField] private float jumpBufferTime = 0.1f;
-    [SerializeField] private float fallMultiplier = 2f;
-    [SerializeField] private float lowJumpMultiplier = 1.5f;
-
-    // DASH
-    [Header("DASH")]
-    [SerializeField] private float dashSpeed = 25f;
-    [SerializeField] private float dashDuration = 0.2f;
-    [SerializeField] private float dashCooldown = 1f;
-    [SerializeField] private ParticleSystem dashParticles;
-
-    // SHOOT
-    [Header("SHOOT")]
-    [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private Transform firePoint;
-    [SerializeField] private float bulletSpeed = 20f;
-    [SerializeField] private float fireRate = 0.2f;
-    [SerializeField] private float recoilForce = 2f;
-    [SerializeField] private AudioClip shootSound;
-
-    // COMPONENTS
+    [Header("Movement Settings")]
+    public float speed = 5f;
+    public float jumpForce = 8f;
+    public int maxJumpCount = 1;
+    public float fastFallMultiplier = 2f;
+    
+    [Header("Roll Settings")]
+    public float rollSpeed = 20f;
+    public float rollDuration = 0.3f;
+    public float rollCooldown = 1f;
+    public float airRollDistance = 3f;
+    public float longJumpForce = 10f;
+    
+    [Header("Crouch Settings")]
+    public float crouchSpeedMultiplier = 0.5f;
+    public float crouchHeightMultiplier = 0.5f;
+    
+    [Header("Aiming Settings")]
+    public bool lockMovementWhenAiming = false;
+    public float aimingMoveSpeedMultiplier = 0.5f;
+    
+    [Header("Shooting Settings")]
+    public bool canShootWhileMoving = true;
+    public bool canShootWhileRolling = false;
+    public GameObject projectilePrefab;
+    public Transform firePoint;
+    public float projectileSpeed = 10f;
+    public float fireRate = 0.2f;
+    public int maxAmmo = 10;
+    public float reloadTime = 1f;
+    
     private Rigidbody2D rb;
-    private Animator anim;
-    private AudioSource audioSource;
-    private bool isFacingRight = true;
-
-    // STATE
+    private CapsuleCollider2D playerCollider;
+    private SpriteRenderer spriteRenderer;
+    private Animator animator;
+    
     private bool isGrounded;
-    private bool isDashing;
     private int jumpCount;
-    private float lastGroundedTime;
-    private float lastJumpPressTime;
-    private float lastDashTime;
-    private float nextFireTime;
-    private float originalGravity;
+    private Vector3 originalScale;
+    private Vector2 originalColliderSize;
+    private Vector2 originalColliderOffset;
+    
+    private float lastRollTime = -Mathf.Infinity;
+    private bool isRolling = false;
+    private bool isCrouching = false;
+    private bool isAiming = false;
+    private bool isFastFalling = false;
+    private bool isReloading = false;
+    private int currentAmmo;
+    private float nextFireTime = 0f;
 
-    void Awake()
+    void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
-        originalGravity = rb.gravityScale;
+        playerCollider = GetComponent<CapsuleCollider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
+        
+        originalScale = transform.localScale;
+        originalColliderSize = playerCollider.size;
+        originalColliderOffset = playerCollider.offset;
+        
+        currentAmmo = maxAmmo;
     }
 
     void Update()
     {
-        // Input and Timers
-        HandleJumpInput();
-        HandleDashInput();
-        HandleShooting();
-        UpdateTimers();
-        UpdateAnimations();
-    }
-
-    void FixedUpdate()
-    {
-        // Physics
-        GroundCheck();
-        if (!isDashing) HandleMovement();
-        HandleGravity();
-    }
-
-    #region MOVEMENT
-    private void HandleMovement()
-    {
-        float moveInput = Input.GetAxisRaw("Horizontal");
-        float targetSpeed = moveInput * moveSpeed;
-        float speedDiff = targetSpeed - rb.linearVelocity.x;
-        float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? acceleration : deceleration;
-        
-        // Air control modifier
-        if (!isGrounded) accelRate *= airControl;
-
-        rb.AddForce(Vector2.right * speedDiff * accelRate);
-
-        // Flip handling
-        if (moveInput > 0 && !isFacingRight) Flip();
-        else if (moveInput < 0 && isFacingRight) Flip();
-    }
-
-    private void Flip()
-    {
-        isFacingRight = !isFacingRight;
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
-    }
-    #endregion
-
-    #region JUMP
-    private void HandleJumpInput()
-    {
-        if (Input.GetButtonDown("Jump"))
+        if (!isRolling) // Only allow other movements when not rolling
         {
-            lastJumpPressTime = Time.time;
-            TryJump();
+            GroundCheck();
+            AimCheck();
+            MoveCheck();
+            FlipCheck();
+            CrouchCheck();
+            JumpCheck();
+            FastFallCheck();
+        }
+        
+        RollCheck();
+        ShootCheck();
+        AnimCheck();
+    }
+
+    void GroundCheck()
+    {
+        isGrounded = false;
+        float rayLength = playerCollider.size.x * 0.45f;
+        
+        Vector2 rayOrigin = (Vector2)transform.position + 
+                          Vector2.up * (playerCollider.offset.y + rayLength * 0.8f - (playerCollider.size.y / 2));
+        
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(rayOrigin, rayLength);
+        
+        foreach (Collider2D collider in colliders)
+        {
+            if (collider != playerCollider && !collider.isTrigger)
+            {
+                isGrounded = true;
+                jumpCount = 0;
+                isRolling = false;
+                break;
+            }
         }
     }
 
-    private void TryJump()
+    void AimCheck()
     {
-        bool canCoyoteJump = Time.time - lastGroundedTime <= coyoteTime;
-        bool hasJumpBuffer = Time.time - lastJumpPressTime <= jumpBufferTime;
-
-        if ((isGrounded || canCoyoteJump || jumpCount < maxJumps) && hasJumpBuffer)
+        isAiming = Input.GetMouseButton(1) || Input.GetAxis("Aim") > 0.1f;
+        
+        // Si on vise avec la souris, orienter le personnage vers le curseur
+        if (isAiming && Camera.main != null)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0);
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            if (mousePos.x < transform.position.x)
+                transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+            else
+                transform.localScale = originalScale;
+        }
+    }
+
+    void MoveCheck()
+    {
+        // Si on est en train de viser et que le mouvement est verrouillé pendant la visée
+        if (isAiming && lockMovementWhenAiming) 
+        {
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y); // On garde seulement la vélocité verticale
+            return;
+        }
+
+        float moveInput = Input.GetAxisRaw("Horizontal"); // Utilisation de GetAxisRaw pour un contrôle plus net
+        float currentSpeed = speed;
+
+        // Application des modificateurs de vitesse
+        if (isCrouching) currentSpeed *= crouchSpeedMultiplier;
+        if (isAiming) currentSpeed *= aimingMoveSpeedMultiplier;
+
+        // Application du mouvement
+        rb.linearVelocity = new Vector2(moveInput * currentSpeed, rb.linearVelocity.y);
+    }
+
+    void CrouchCheck()
+    {
+        bool crouchInput = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.LeftControl);
+        
+        if (crouchInput && !isCrouching && isGrounded)
+        {
+            isCrouching = true;
+            playerCollider.size = new Vector2(originalColliderSize.x, originalColliderSize.y * crouchHeightMultiplier);
+            playerCollider.offset = new Vector2(originalColliderOffset.x, originalColliderOffset.y * crouchHeightMultiplier);
+        }
+        else if (!crouchInput && isCrouching)
+        {
+            if (!CheckCeiling())
+            {
+                isCrouching = false;
+                playerCollider.size = originalColliderSize;
+                playerCollider.offset = originalColliderOffset;
+            }
+        }
+    }
+
+    bool CheckCeiling()
+    {
+        float rayLength = originalColliderSize.y - playerCollider.size.y;
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position, 
+            Vector2.up, 
+            rayLength, 
+            ~LayerMask.GetMask("Player")
+        );
+        return hit.collider != null;
+    }
+
+    void JumpCheck()
+    {
+        if (Input.GetButtonDown("Jump") && (isGrounded || jumpCount < maxJumpCount))
+        {
+            if (isRolling && isGrounded)
+            {
+                rb.linearVelocity = new Vector2(transform.localScale.x > 0 ? longJumpForce : -longJumpForce, jumpForce);
+                isRolling = false;
+            }
+            else
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            }
             jumpCount++;
-            lastJumpPressTime = float.MinValue;
         }
     }
 
-    private void HandleGravity()
+    void FastFallCheck()
     {
-        if (rb.linearVelocity.y < 0)
+        if (!isGrounded && (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.LeftControl)))
         {
-            rb.gravityScale = originalGravity * fallMultiplier;
-        }
-        else if (rb.linearVelocity.y > 0 && !Input.GetButton("Jump"))
-        {
-            rb.gravityScale = originalGravity * lowJumpMultiplier;
+            isFastFalling = true;
+            rb.linearVelocity += Vector2.down * fastFallMultiplier;
         }
         else
         {
-            rb.gravityScale = originalGravity;
-        }
-    }
-    #endregion
-
-    #region DASH
-    private void HandleDashInput()
-    {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= lastDashTime + dashCooldown)
-        {
-            StartDash();
+            isFastFalling = false;
         }
     }
 
-    private void StartDash()
+    void RollCheck()
     {
-        isDashing = true;
-        lastDashTime = Time.time;
-        rb.linearVelocity = new Vector2((isFacingRight ? 1 : -1) * dashSpeed, 0);
-        rb.gravityScale = 0;
-        
-        if (dashParticles) dashParticles.Play();
-        StartCoroutine(StopDashAfterTime(dashDuration));
-    }
-
-    private IEnumerator StopDashAfterTime(float time)
-    {
-        yield return new WaitForSeconds(time);
-        StopDash();
-    }
-
-    private void StopDash()
-    {
-        isDashing = false;
-        rb.gravityScale = originalGravity;
-    }
-    #endregion
-
-    #region SHOOT
-    private void HandleShooting()
-    {
-        if (Input.GetButton("Fire1") && Time.time >= nextFireTime && !isDashing)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= lastRollTime + rollCooldown)
         {
-            Shoot();
-            nextFireTime = Time.time + fireRate;
+            float direction = Mathf.Sign(Input.GetAxis("Horizontal"));
+            if (direction == 0) direction = transform.localScale.x > 0 ? 1 : -1;
             
-            // Recoil effect
-            if (isGrounded) rb.AddForce(new Vector2(isFacingRight ? -recoilForce : recoilForce, 0), ForceMode2D.Impulse);
+            StartCoroutine(PerformRoll(direction));
         }
     }
 
-    private void Shoot()
+    IEnumerator PerformRoll(float direction)
     {
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        Vector2 direction = isFacingRight ? Vector2.right : Vector2.left;
+        isRolling = true;
+        lastRollTime = Time.time;
         
-        Bullet bulletScript = bullet.GetComponent<Bullet>();
-        if (bulletScript != null)
+        float startTime = Time.time;
+        
+        if (isGrounded)
         {
-            bulletScript.Initialize(direction, bulletSpeed, gameObject.tag);
+            while (Time.time < startTime + rollDuration)
+            {
+                rb.linearVelocity = new Vector2(rollSpeed * direction, 0);
+                yield return null;
+            }
         }
         else
         {
-            Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
-            bulletRb.linearVelocity = direction * bulletSpeed;
+            while (Time.time < startTime + rollDuration * 1.5f)
+            {
+                rb.linearVelocity = new Vector2(rollSpeed * direction * 0.8f, rb.linearVelocity.y);
+                yield return null;
+            }
         }
-
-        anim.SetTrigger("Shoot");
-        if (shootSound) audioSource.PlayOneShot(shootSound);
+        
+        isRolling = false;
     }
-    #endregion
 
-    #region UTILITIES
-    private void GroundCheck()
+    void FlipCheck()
     {
-        bool wasGrounded = isGrounded;
-        isGrounded = Physics2D.OverlapCircle(transform.position, groundCheckRadius, groundLayer);
+        if (isAiming && lockMovementWhenAiming) return;
 
-        if (isGrounded && !wasGrounded)
+        float horizontalInput = Input.GetAxis("Horizontal");
+        
+        if (horizontalInput < 0)
         {
-            lastGroundedTime = Time.time;
-            jumpCount = 0;
+            transform.localScale = new Vector3(-Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
         }
-    }
-
-    private void UpdateTimers()
-    {
-        // Automatic jump buffer expiration
-        if (Time.time - lastJumpPressTime > jumpBufferTime + 0.1f)
+        else if (horizontalInput > 0)
         {
-            lastJumpPressTime = float.MinValue;
+            transform.localScale = originalScale;
         }
     }
 
-    private void UpdateAnimations()
+    void ShootCheck()
     {
-        anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
-        anim.SetBool("IsGrounded", isGrounded);
-        anim.SetFloat("VerticalVelocity", rb.linearVelocity.y);
-        anim.SetBool("IsDashing", isDashing);
+        // Rechargement
+        if (Input.GetKeyDown(KeyCode.R) && !isReloading && currentAmmo < maxAmmo)
+        {
+            StartCoroutine(Reload());
+            return;
+        }
+
+        // Tir
+        if (Input.GetButton("Fire1") && Time.time >= nextFireTime && !isReloading)
+        {
+            bool canShoot = canShootWhileMoving && (!isRolling || canShootWhileRolling);
+            
+            if (canShoot && currentAmmo > 0)
+            {
+                Shoot();
+                nextFireTime = Time.time + fireRate;
+                currentAmmo--;
+                
+                if (currentAmmo <= 0)
+                {
+                    StartCoroutine(Reload());
+                }
+            }
+        }
+    }
+
+    void Shoot()
+    {
+        if (projectilePrefab == null || firePoint == null)
+        {
+            Debug.LogWarning("Projectile prefab or fire point not set!");
+            return;
+        }
+
+        GameObject projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        Rigidbody2D rbProjectile = projectile.GetComponent<Rigidbody2D>();
+        
+        // Déterminer la direction du tir en fonction de l'orientation du personnage
+        float direction = transform.localScale.x > 0 ? 1 : -1;
+        
+        if (isAiming && Camera.main != null)
+        {
+            // Si on vise avec la souris, calculer la direction vers le curseur
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 directionVector = (mousePos - firePoint.position).normalized;
+            rbProjectile.linearVelocity = directionVector * projectileSpeed;
+        }
+        else
+        {
+            // Tirer dans la direction du personnage
+            rbProjectile.linearVelocity = new Vector2(direction * projectileSpeed, 0);
+        }
+        
+        // Animation de tir
+        animator.SetTrigger("Shoot");
+    }
+
+    IEnumerator Reload()
+    {
+        isReloading = true;
+        animator.SetBool("IsReloading", true);
+        
+        yield return new WaitForSeconds(reloadTime);
+        
+        currentAmmo = maxAmmo;
+        isReloading = false;
+        animator.SetBool("IsReloading", false);
+    }
+
+    void AnimCheck()
+    {
+        animator.SetFloat("VelocityX", Mathf.Abs(rb.linearVelocity.x));
+        animator.SetFloat("VelocityY", rb.linearVelocity.y);
+        animator.SetBool("IsGrounded", isGrounded);
+        animator.SetBool("IsCrouching", isCrouching);
+        animator.SetBool("IsRolling", isRolling);
+        animator.SetBool("IsAiming", isAiming);
+        animator.SetBool("IsFastFalling", isFastFalling);
+        animator.SetInteger("CurrentAmmo", currentAmmo);
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, groundCheckRadius);
+        if (playerCollider == null)
+            playerCollider = GetComponent<CapsuleCollider2D>();
+
+        float rayLength = playerCollider.size.x * 0.45f;
+        Gizmos.color = Color.magenta;
+        
+        Vector2 rayOrigin = (Vector2)transform.position + 
+                          Vector2.up * (playerCollider.offset.y + rayLength * 0.8f - (playerCollider.size.y / 2));
+        
+        Gizmos.DrawWireSphere(rayOrigin, rayLength);
+
+        if (isCrouching)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawRay(transform.position, Vector2.up * (originalColliderSize.y - playerCollider.size.y));
+        }
     }
-    #endregion
+
+    private void OnGUI()
+    {
+        GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.Label($"State: {gameObject.name}");
+        GUILayout.Label($"Grounded: {isGrounded}");
+        GUILayout.Label($"Jumps: {jumpCount}/{maxJumpCount}");
+        GUILayout.Label($"Speed: {rb.linearVelocity.magnitude:F1}");
+        GUILayout.Label($"Rolling: {isRolling}");
+        GUILayout.Label($"Roll Cooldown: {Mathf.Max(0, rollCooldown - (Time.time - lastRollTime)):F1}");
+        GUILayout.Label($"Crouching: {isCrouching}");
+        GUILayout.Label($"Aiming: {isAiming}");
+        GUILayout.Label($"Fast Falling: {isFastFalling}");
+        GUILayout.Label($"Ammo: {currentAmmo}/{maxAmmo}");
+        GUILayout.Label($"Reloading: {isReloading}");
+        GUILayout.EndVertical();
+    }
 }
