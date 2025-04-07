@@ -132,7 +132,7 @@ public class AdvancedMovement : MonoBehaviour
             return;
         }
 
-        float moveInput = Input.GetAxisRaw("Horizontal"); // Utilisation de GetAxisRaw pour un contrôle plus net
+        float moveInput = Input.GetAxis("Horizontal"); 
         float currentSpeed = speed;
 
         // Application des modificateurs de vitesse
@@ -145,7 +145,7 @@ public class AdvancedMovement : MonoBehaviour
 
     void CrouchCheck()
     {
-        bool crouchInput = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.LeftControl);
+        bool crouchInput = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.S);
         
         if (crouchInput && !isCrouching && isGrounded)
         {
@@ -164,16 +164,29 @@ public class AdvancedMovement : MonoBehaviour
         }
     }
 
-    bool CheckCeiling()
+            bool CheckCeiling()
     {
         float rayLength = originalColliderSize.y - playerCollider.size.y;
-        RaycastHit2D hit = Physics2D.Raycast(
-            transform.position, 
+        Vector2 rayOriginLeft = (Vector2)transform.position + 
+                              new Vector2(-playerCollider.size.x * 0.4f, playerCollider.offset.y);
+        Vector2 rayOriginRight = (Vector2)transform.position + 
+                               new Vector2(playerCollider.size.x * 0.4f, playerCollider.offset.y);
+
+        // Tirez deux rayons (gauche et droite) pour une meilleure détection
+        RaycastHit2D hitLeft = Physics2D.Raycast(
+            rayOriginLeft, 
             Vector2.up, 
             rayLength, 
             ~LayerMask.GetMask("Player")
         );
-        return hit.collider != null;
+        RaycastHit2D hitRight = Physics2D.Raycast(
+            rayOriginRight, 
+            Vector2.up, 
+            rayLength, 
+            ~LayerMask.GetMask("Player")
+        );
+        
+        return hitLeft.collider != null || hitRight.collider != null;
     }
 
     void JumpCheck()
