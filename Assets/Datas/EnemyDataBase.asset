@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f475a882b8ea924286e59003ca4e906, type: 3}
   m_Name: EnemyDataBase
   m_EditorClassIdentifier: 
-  datas: []
+  datas:
+  - pv: 0
+    damage: 0
+    speed: 0
+    sprite: 0
+  - pv: 0
+    damage: 0
+    speed: 0
+    sprite: 0
+  - pv: 0
+    damage: 0
+    speed: 0
+    sprite: 0
