@@ -75,7 +75,7 @@ public class PauseMenu : MonoBehaviour
     // Méthodes pour attribuer des points de stats
     public void AddStrength()
     {
-        XPSystem xpSystem = FindObjectOfType<XPSystem>();
+        XPSystem xpSystem = FindFirstObjectByType<XPSystem>();
         if (xpSystem != null && xpSystem.skillPoints > 0)
         {
             xpSystem.AddStrength();
@@ -85,7 +85,7 @@ public class PauseMenu : MonoBehaviour
 
     public void AddAgility()
     {
-        XPSystem xpSystem = FindObjectOfType<XPSystem>();
+        XPSystem xpSystem = FindFirstObjectByType<XPSystem>();
         if (xpSystem != null && xpSystem.skillPoints > 0)
         {
             xpSystem.AddAgility();
@@ -95,7 +95,7 @@ public class PauseMenu : MonoBehaviour
 
     public void AddFireRate()
     {
-        XPSystem xpSystem = FindObjectOfType<XPSystem>();
+        XPSystem xpSystem = FindFirstObjectByType<XPSystem>();
         if (xpSystem != null && xpSystem.skillPoints > 0)
         {
             xpSystem.AddFireRate();
@@ -106,7 +106,7 @@ public class PauseMenu : MonoBehaviour
     // Met à jour l'interface utilisateur des stats
     void UpdateStatsUI()
     {
-        XPSystem xpSystem = FindObjectOfType<XPSystem>();
+        XPSystem xpSystem = FindFirstObjectByType<XPSystem>();
         if (xpSystem != null)
         {
             Debug.Log("Points de compétences disponibles : " + xpSystem.skillPoints);
@@ -126,10 +126,6 @@ public class PauseMenu : MonoBehaviour
             {
                 skillPointsText.text = "Points de compétence : " + xpSystem.skillPoints;
             }
-        }
-        else
-        {
-            Debug.LogWarning("XPSystem non trouvé dans la scène !");
         }
     }
 }
