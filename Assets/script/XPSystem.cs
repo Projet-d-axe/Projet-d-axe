@@ -1,80 +1,209 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+
+[System.Serializable]
+public class StatModifier
+{
+    public string modifierName;
+    public float strengthMod = 0f;
+    public float agilityMod = 0f;
+    public float fireRateMod = 0f;
+    public float duration = -1f; // -1 = permanent
+}
 
 public class XPSystem : MonoBehaviour
 {
-    public float baseMaxXP = 100f; // XP de base nécessaire pour le premier niveau
-    public float currentXP; // XP actuelle
-    public int currentLevel = 1; // Niveau actuel
-    public int skillPoints = 0; // Points de compétences disponibles
-    public float xpGainRate = 10f; // Quantité d'XP gagnée à chaque action
+    [Header("XP Settings")]
+    public float baseMaxXP = 100f;
+    public float xpGrowthMultiplier = 1.5f;
+    public float currentXP;
+    public int currentLevel = 1;
+    public int skillPoints = 0;
+    public float xpGainRate = 10f;
+    public AnimationCurve xpCurve = AnimationCurve.Linear(0, 0, 1, 1);
 
-    public Slider xpBar; // Référence à la barre d'XP UI
-    public Text levelText; // Référence au texte du niveau UI
-    public Text skillPointsText; // Référence au texte des points de compétences UI
-    public Text strengthText; // Référence au texte de la force UI
-    public Text agilityText; // Référence au texte de l'agilité UI
-    public Text fireRateText; // Référence au texte de la vitesse de tir UI
+    [Header("UI References")]
+    public Slider xpBar;
+    public Text levelText;
+    public Text skillPointsText;
+    public Text strengthText;
+    public Text agilityText;
+    public Text fireRateText;
+    public GameObject levelUpEffect;
+    public AudioClip levelUpSound;
 
-    private float maxXP; // XP nécessaire pour le niveau actuel
+    [Header("Player Stats")]
+    public int baseStrength = 0;
+    public int baseAgility = 0;
+    public float baseFireRate = 1.0f;
+    public int statPointsPerLevel = 1;
+    public int bonusSkillPointsEvery = 5;
 
-    // Statistiques du joueur
-    public int strength = 0;
-    public int agility = 0;
-    public float fireRate = 1.0f; // Vitesse de tir (remplace Intelligence)
+    // Propriétés de compatibilité (Solution 2)
+    public int strength {
+        get { return baseStrength; }
+        set { baseStrength = value; }
+    }
+
+    public int agility {
+        get { return baseAgility; }
+        set { baseAgility = value; }
+    }
+
+    public float fireRate {
+        get { return baseFireRate; }
+        set { baseFireRate = value; }
+    }
+
+    private float maxXP;
+    private AudioSource audioSource;
+    private List<StatModifier> activeModifiers = new List<StatModifier>();
+
+    // Propriétés calculées
+    public int TotalStrength {
+        get {
+            float total = baseStrength;
+            foreach (var mod in activeModifiers) total += mod.strengthMod;
+            return Mathf.RoundToInt(total);
+        }
+    }
+    
+    public int TotalAgility {
+        get {
+            float total = baseAgility;
+            foreach (var mod in activeModifiers) total += mod.agilityMod;
+            return Mathf.RoundToInt(total);
+        }
+    }
+    
+    public float TotalFireRate {
+        get {
+            float total = baseFireRate;
+            foreach (var mod in activeModifiers) total += mod.fireRateMod;
+            return Mathf.Clamp(total, 0.1f, 10f);
+        }
+    }
+
+    void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
 
     void Start()
     {
-        maxXP = baseMaxXP; // Initialise l'XP nécessaire pour le premier niveau
-        currentXP = 0f; // Initialise l'XP à 0
-        UpdateUI(); // Met à jour l'interface utilisateur
+        maxXP = CalculateXPForLevel(currentLevel);
+        currentXP = 0f;
+        UpdateUI();
     }
 
     void Update()
     {
-        // Exemple : Gagner de l'XP en appuyant sur une touche (à adapter à votre jeu)
-        if (Input.GetKeyDown(KeyCode.P))
+        UpdateTemporaryModifiers();
+        
+        if (Input.GetKeyDown(KeyCode.P)) // Debug
         {
             GainXP(xpGainRate);
         }
     }
 
-    // Méthode pour gagner de l'XP
+    float CalculateXPForLevel(int level)
+    {
+        return baseMaxXP * Mathf.Pow(xpGrowthMultiplier, level - 1);
+    }
+
     public void GainXP(float amount)
     {
+        float xpBefore = currentXP / maxXP;
         currentXP += amount;
-        Debug.Log("XP gagnée : " + amount + ", XP actuelle : " + currentXP);
+        float xpAfter = currentXP / maxXP;
 
-        // Vérifie si le joueur a atteint le niveau suivant
+        StartCoroutine(AnimateXPGain(xpBefore, xpAfter));
+
+        if (currentXP >= maxXP)
+        {
+            LevelUp();
+        }
+    }
+
+    IEnumerator AnimateXPGain(float startValue, float endValue)
+    {
+        float duration = 0.5f;
+        float elapsed = 0f;
+        
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            xpBar.value = Mathf.Lerp(startValue, endValue, xpCurve.Evaluate(t));
+            yield return null;
+        }
+        
+        xpBar.value = endValue;
+    }
+
+    void LevelUp()
+    {
+        currentLevel++;
+        skillPoints += statPointsPerLevel;
+        
+        if (currentLevel % bonusSkillPointsEvery == 0)
+        {
+            skillPoints++;
+            Debug.Log("Bonus skill point for reaching level " + currentLevel);
+        }
+
+        currentXP -= maxXP;
+        maxXP = CalculateXPForLevel(currentLevel);
+
+        if (levelUpEffect != null)
+            Instantiate(levelUpEffect, transform.position, Quaternion.identity);
+        
+        if (levelUpSound != null)
+            audioSource.PlayOneShot(levelUpSound);
+
+        Debug.Log("Level Up! Now level " + currentLevel);
+
         if (currentXP >= maxXP)
         {
             LevelUp();
         }
 
-        UpdateUI(); // Met à jour l'interface utilisateur
+        UpdateUI();
     }
 
-    // Méthode pour monter de niveau
-    void LevelUp()
+    public void AddStatModifier(StatModifier modifier)
     {
-        currentLevel++; // Augmente le niveau
-        skillPoints++; // Donne un point de compétence
-        currentXP = 0f; // Réinitialise l'XP pour le prochain niveau
-        maxXP *= 1.5f; // Augmente l'XP nécessaire pour le prochain niveau (exemple : +50%)
-
-        Debug.Log("Niveau supérieur atteint ! Niveau actuel : " + currentLevel);
-
-        UpdateUI(); // Met à jour l'interface utilisateur
+        activeModifiers.Add(modifier);
+        UpdateUI();
     }
 
-    // Méthodes pour attribuer des points de stats
+    void UpdateTemporaryModifiers()
+    {
+        for (int i = activeModifiers.Count - 1; i >= 0; i--)
+        {
+            if (activeModifiers[i].duration > 0)
+            {
+                activeModifiers[i].duration -= Time.deltaTime;
+                if (activeModifiers[i].duration <= 0)
+                {
+                    activeModifiers.RemoveAt(i);
+                    UpdateUI();
+                }
+            }
+        }
+    }
+
     public void AddStrength()
     {
         if (skillPoints > 0)
         {
-            strength++;
+            baseStrength++;
             skillPoints--;
-            Debug.Log("Force augmentée ! Force actuelle : " + strength);
             UpdateUI();
         }
     }
@@ -83,57 +212,76 @@ public class XPSystem : MonoBehaviour
     {
         if (skillPoints > 0)
         {
-            agility++;
+            baseAgility++;
             skillPoints--;
-            Debug.Log("Agilité augmentée ! Agilité actuelle : " + agility);
             UpdateUI();
         }
     }
 
-    public void AddFireRate() // Remplace Intelligence par Vitesse de tir
+    public void AddFireRate()
     {
         if (skillPoints > 0)
         {
-            fireRate += 0.1f; // Augmente la vitesse de tir de 0.1
+            baseFireRate += 0.1f;
             skillPoints--;
-            Debug.Log("Vitesse de tir augmentée ! Vitesse de tir actuelle : " + fireRate);
             UpdateUI();
         }
     }
 
-    // Met à jour l'interface utilisateur
     void UpdateUI()
     {
-        // Met à jour la barre d'XP
         if (xpBar != null)
         {
-            xpBar.value = currentXP / maxXP;
+            xpBar.maxValue = maxXP;
+            xpBar.value = currentXP;
         }
 
-        // Met à jour le texte du niveau
         if (levelText != null)
         {
             levelText.text = "Niveau : " + currentLevel;
         }
 
-        // Met à jour le texte des points de compétences
         if (skillPointsText != null)
         {
-            skillPointsText.text = "Points de compétence : " + skillPoints;
+            skillPointsText.text = "Points : " + skillPoints;
         }
 
-        // Met à jour les statistiques
         if (strengthText != null)
         {
-            strengthText.text = "Force : " + strength;
+            strengthText.text = "Force : " + TotalStrength;
         }
+        
         if (agilityText != null)
         {
-            agilityText.text = "Agilité : " + agility;
+            agilityText.text = "Agilité : " + TotalAgility;
         }
+        
         if (fireRateText != null)
         {
-            fireRateText.text = "Vitesse de tir : " + fireRate.ToString("F1"); // Affiche 1 chiffre après la virgule
+            fireRateText.text = "Vit. Tir : " + TotalFireRate.ToString("F1");
         }
+    }
+
+    public void SaveData()
+    {
+        PlayerPrefs.SetInt("PlayerLevel", currentLevel);
+        PlayerPrefs.SetFloat("PlayerXP", currentXP);
+        PlayerPrefs.SetInt("PlayerStrength", baseStrength);
+        PlayerPrefs.SetInt("PlayerAgility", baseAgility);
+        PlayerPrefs.SetFloat("PlayerFireRate", baseFireRate);
+        PlayerPrefs.SetInt("PlayerSkillPoints", skillPoints);
+    }
+
+    public void LoadData()
+    {
+        currentLevel = PlayerPrefs.GetInt("PlayerLevel", 1);
+        currentXP = PlayerPrefs.GetFloat("PlayerXP", 0);
+        baseStrength = PlayerPrefs.GetInt("PlayerStrength", 0);
+        baseAgility = PlayerPrefs.GetInt("PlayerAgility", 0);
+        baseFireRate = PlayerPrefs.GetFloat("PlayerFireRate", 1.0f);
+        skillPoints = PlayerPrefs.GetInt("PlayerSkillPoints", 0);
+        
+        maxXP = CalculateXPForLevel(currentLevel);
+        UpdateUI();
     }
 }
