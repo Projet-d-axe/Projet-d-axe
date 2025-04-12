@@ -1,78 +1,307 @@
 using UnityEngine;
+using System.Collections;
 
-public class PlayerController : MonoBehaviour
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(CapsuleCollider2D))]
+public class PlayerController : MonoBehaviour 
 {
-    // Mouvement
-    [SerializeField] private float _speed = 8f;
-    [SerializeField] private float _acceleration = 15f;
-    [SerializeField] private float _deceleration = 20f;
-    [Range(0, 1)] [SerializeField] private float _airControl = 0.6f;
+    #region Movement Settings
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 8f;
+    [SerializeField] private float acceleration = 15f;
+    [SerializeField] private float deceleration = 20f;
+    [Range(0,1)] [SerializeField] private float airControl = 0.6f;
+    #endregion
 
-    // Saut
-    [SerializeField] private float _jumpForce = 16f;
-    [SerializeField] private float _fallMultiplier = 2.5f;
-    [SerializeField] private float _coyoteTime = 0.15f;
-    [SerializeField] private int _maxAirJumps = 1;
+    #region Jump Settings
+    [Header("Jump")]
+    [SerializeField] private float jumpForce = 16f;
+    [SerializeField] private float fallMultiplier = 2.5f;
+    [SerializeField] private float lowJumpMultiplier = 2f;
+    [SerializeField] private float coyoteTime = 0.15f;
+    [SerializeField] private int maxAirJumps = 1;
+    #endregion
 
-    // Composants
-    private Rigidbody2D _rb;
-    private bool _isGrounded;
-    private int _remainingJumps;
-    private float _lastGroundedTime;
-    private float _moveInput;
+    #region Crouch Settings
+    [Header("Crouch")]
+    [SerializeField] private float crouchHeight = 0.5f;
+    [SerializeField] private float crouchSpeed = 10f;
+    [SerializeField] private float crouchSpeedMultiplier = 0.4f;
+    #endregion
+
+    #region Roll Settings
+    [Header("Roll")]
+    [SerializeField] private float rollDistance = 4f;
+    [SerializeField] private float rollDuration = 0.2f;
+    [SerializeField] private float rollCooldown = 0.5f;
+    [SerializeField] private LayerMask enemyLayer;
+    #endregion
+
+    #region Advanced Movement
+    [Header("Advanced")]
+    [SerializeField] private float fastFallSpeed = 30f; // Augmenté pour meilleur effet
+    [SerializeField] private float longJumpMultiplier = 1.8f;
+    [SerializeField] private float airRollBoost = 1.3f;
+    [SerializeField] private float jumpBufferTime = 0.1f;
+    #endregion
+
+    #region Components
+    private Rigidbody2D rb;
+    private CapsuleCollider2D col;
+    [SerializeField] private Transform graphics; // Serialisé pour assignation facile
+    #endregion
+
+    #region State
+    private bool isGrounded;
+    private bool isCrouching;
+    private bool isRolling;
+    private bool isFacingRight = true;
+    private bool isJumpCut;
+    private int remainingJumps;
+    private float lastGroundedTime;
+    private float nextRollTime;
+    private float originalColHeight;
+    private float moveInput;
+    private float jumpBufferCounter;
+    #endregion
 
     private void Awake()
     {
-        _rb = GetComponent<Rigidbody2D>();
-        _remainingJumps = _maxAirJumps;
+        rb = GetComponent<Rigidbody2D>();
+        col = GetComponent<CapsuleCollider2D>();
+        originalColHeight = col.size.y;
+        ResetJumps();
+        
+        // Fallback si graphics n'est pas assigné
+        if (graphics == null) graphics = transform.Find("Graphics") ?? transform;
     }
 
     private void Update()
     {
-        // Input basique
-        _moveInput = Input.GetAxisRaw("Horizontal");
-
-        if (Input.GetButtonDown("Jump")) TryJump();
+        GetInputs();
+        HandleFlip(); // Maintenant dans Update pour plus de réactivité
+        HandleFastFall(); // Géré frame par frame
     }
 
     private void FixedUpdate()
     {
         CheckGrounded();
-        Move();
+        if (!isRolling) HandleMovement();
         ApplyJumpGravity();
+        HandleCrouch();
     }
 
-    private void Move()
+    #region Inputs
+    private void GetInputs()
     {
-        float targetSpeed = _moveInput * _speed;
-        float acceleration = (Mathf.Abs(_moveInput) > 0.1f) ? _acceleration : _deceleration;
-        float control = _isGrounded ? 1f : _airControl;
+        moveInput = Input.GetAxisRaw("Horizontal");
 
-        float newSpeed = Mathf.Lerp(_rb.linearVelocity.x, targetSpeed, acceleration * control * Time.fixedDeltaTime);
-        _rb.linearVelocity = new Vector2(newSpeed, _rb.linearVelocity.y);
+        // Jump Buffer
+        if (Input.GetButtonDown("Jump"))
+            jumpBufferCounter = jumpBufferTime;
+        else
+            jumpBufferCounter -= Time.deltaTime;
+
+        if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
+            isJumpCut = true;
+
+        isCrouching = Input.GetAxisRaw("Vertical") < 0 && isGrounded;
+
+        if (Input.GetButtonDown("Fire3") && CanRoll())
+            StartCoroutine(Roll());
     }
+    #endregion
 
-    private void TryJump()
+    #region Movement
+    private void HandleMovement()
     {
-        if (_isGrounded || Time.time < _lastGroundedTime + _coyoteTime || _remainingJumps > 0)
+        float currentMaxSpeed = isCrouching ? moveSpeed * crouchSpeedMultiplier : moveSpeed;
+        float targetSpeed = moveInput * currentMaxSpeed;
+        float accel = (Mathf.Abs(moveInput) > 0.1f) ? acceleration : deceleration;
+        float control = isGrounded ? 1f : airControl;
+
+        rb.linearVelocity = new Vector2(
+            Mathf.Lerp(rb.linearVelocity.x, targetSpeed, accel * control * Time.fixedDeltaTime),
+            rb.linearVelocity.y
+        );
+    }
+    #endregion
+
+    #region Flip
+    private void HandleFlip()
+    {
+        if (Mathf.Abs(moveInput) > 0.01f) // Seuil très bas pour une réactivité maximale
         {
-            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
-            if (!_isGrounded) _remainingJumps--;
+            bool shouldFaceRight = moveInput > 0;
+            if (shouldFaceRight != isFacingRight)
+            {
+                Flip();
+            }
         }
     }
 
-    private void CheckGrounded()
+    private void Flip()
     {
-        bool wasGrounded = _isGrounded;
-        _isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.1f);
+        isFacingRight = !isFacingRight;
+        Vector3 newScale = transform.localScale;
+        newScale.x = Mathf.Abs(newScale.x) * (isFacingRight ? 1 : -1);
+        transform.localScale = newScale;
+        
+    }
+    #endregion
 
-        if (_isGrounded && !wasGrounded) _remainingJumps = _maxAirJumps;
-        else if (!_isGrounded && wasGrounded) _lastGroundedTime = Time.time;
+    #region Jump
+    private void TryJump()
+    {
+        if (CanJump())
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            remainingJumps--;
+            isJumpCut = false;
+        }
+    }
+
+    private bool CanJump()
+    {
+        return (isGrounded || Time.time < lastGroundedTime + coyoteTime || remainingJumps > 0) && !isRolling;
     }
 
     private void ApplyJumpGravity()
     {
-        if (_rb.linearVelocity.y < 0)
-            _rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (_fallMultiplier - 1) * Time.fixedDeltaTime;
+        if (rb.linearVelocity.y < 0)
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.fixedDeltaTime;
+        else if (rb.linearVelocity.y > 0 && isJumpCut)
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.fixedDeltaTime;
     }
+
+    private void ResetJumps() => remainingJumps = maxAirJumps;
+    #endregion
+
+    #region Fast Fall 
+    private void HandleFastFall()
+    {
+        bool isPressingDown = Input.GetAxisRaw("Vertical") < -0.5f; // Seuil plus strict
+        if (isPressingDown && !isGrounded && rb.linearVelocity.y < 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -fastFallSpeed);
+        }
+    }
+    #endregion
+
+    #region Crouch
+    private void HandleCrouch()
+    {
+        if (isCrouching)
+        {
+            col.size = new Vector2(
+                col.size.x,
+                Mathf.MoveTowards(col.size.y, crouchHeight, crouchSpeed * Time.fixedDeltaTime)
+            );
+        }
+        else
+        {
+            col.size = new Vector2(
+                col.size.x,
+                Mathf.MoveTowards(col.size.y, originalColHeight, crouchSpeed * Time.fixedDeltaTime)
+            );
+        }
+    }
+    #endregion
+
+    #region Roll
+    private bool CanRoll() => Time.time >= nextRollTime && !isRolling;
+
+    private IEnumerator Roll()
+    {
+        isRolling = true;
+        float direction = isFacingRight ? 1 : -1;
+        float startTime = Time.time;
+
+        Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), true);
+
+        while (Time.time < startTime + rollDuration)
+        {
+            float progress = (Time.time - startTime) / rollDuration;
+            float currentSpeed = Mathf.Lerp(rollDistance / rollDuration, 0, progress);
+            rb.linearVelocity = new Vector2(direction * currentSpeed, rb.linearVelocity.y);
+            yield return null;
+        }
+
+        EndRoll();
+    }
+
+    private void EndRoll()
+    {
+        isRolling = false;
+        nextRollTime = Time.time + rollCooldown;
+        Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), false);
+    }
+    #endregion
+
+    #region Ground Check
+    private void CheckGrounded()
+    {
+        bool wasGrounded = isGrounded;
+        RaycastHit2D hit = Physics2D.BoxCast(
+            col.bounds.center,
+            new Vector2(col.bounds.size.x * 0.9f, 0.1f),
+            0f,
+            Vector2.down,
+            col.bounds.extents.y + 0.05f,
+            LayerMask.GetMask("Ground")
+        );
+        
+        isGrounded = hit.collider != null;
+
+        if (isGrounded && !wasGrounded) 
+        {
+            ResetJumps();
+            isJumpCut = false;
+        }
+        else if (!isGrounded && wasGrounded) 
+        {
+            lastGroundedTime = Time.time;
+        }
+
+        if (jumpBufferCounter > 0 && CanJump())
+        {
+            TryJump();
+            jumpBufferCounter = 0;
+        }
+    }
+    #endregion
+
+    #region Debug GUI
+    private void OnGUI()
+    {
+        GUIStyle style = new GUIStyle(GUI.skin.box);
+        style.fontSize = 14;
+        style.normal.textColor = Color.white;
+
+        GUILayout.BeginArea(new Rect(10, 10, 300, 250));
+        GUILayout.BeginVertical("box", style);
+        
+        // État de base
+        GUILayout.Label($"Position: {transform.position}");
+        GUILayout.Label($"Vitesse: X:{rb.linearVelocity.x:F1} Y:{rb.linearVelocity.y:F1}");
+        GUILayout.Label($"Au sol: {isGrounded}", GetStyle(isGrounded));
+        GUILayout.Label($"Direction: {(isFacingRight ? "Droite" : "Gauche")}");
+
+        // Mouvements spéciaux
+        GUILayout.Label($"\nFast Fall: {Input.GetAxisRaw("Vertical") < -0.5f && !isGrounded}", 
+                      GetStyle(Input.GetAxisRaw("Vertical") < -0.5f && !isGrounded));
+        GUILayout.Label($"Flip Actif: {Mathf.Abs(moveInput) > 0.01f}", 
+                      GetStyle(Mathf.Abs(moveInput) > 0.01f));
+        
+        GUILayout.EndVertical();
+        GUILayout.EndArea();
+    }
+
+    private GUIStyle GetStyle(bool condition)
+    {
+        GUIStyle style = new GUIStyle(GUI.skin.label);
+        style.normal.textColor = condition ? Color.green : Color.red;
+        return style;
+    }
+    #endregion
 }

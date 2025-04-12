@@ -1,74 +1,58 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
 public class Bullet : MonoBehaviour
 {
     [Header("Bullet Settings")]
-    public float speed = 10f;
-    public int damage = 1;
-    public float lifetime = 3f;
-    public LayerMask collisionLayers;
-    public GameObject impactEffect;
-    public bool destroyOnImpact = true;
-
-    [Header("Advanced")]
-    public bool piercing = false;
-    public int maxPierceCount = 3;
-    private int currentPierceCount = 0;
-    public string[] validTags = { "Enemy", "Boss", "Destructible" };
-
+    [SerializeField] private float speed = 10f;
+    [SerializeField] private int maxPierceCount = 1;
+    [SerializeField] private float lifetime = 2f;
+    [SerializeField] private int damage = 1;
+    
     private Rigidbody2D rb;
-    private Vector2 direction;
+    private int currentPierceCount; // Maintenant utilisé dans OnTriggerEnter2D
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        Destroy(gameObject, lifetime); // Auto-destruction après la durée de vie
+        currentPierceCount = maxPierceCount;
+        Destroy(gameObject, lifetime);
     }
 
-    public void Initialize(Vector2 shootDirection)
+    public void Fire(Vector2 direction)
     {
-        direction = shootDirection.normalized;
-        rb.linearVelocity = direction * speed;
-        
-        // Orienter le projectile dans la direction du tir
-        if (direction != Vector2.zero)
-        {
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-        }
+        rb.linearVelocity = direction.normalized * speed;
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Vérifications de sécurité
-        if (other == null) return;
-        if (other.isTrigger) return;
-        if (!IsInLayerMask(other.gameObject.layer, collisionLayers)) return;
-
-        // Vérification des tags valides
-        bool validCollision = false;
-        foreach (string tag in validTags)
+        if (collision.CompareTag("Enemy"))
         {
-            if (other.CompareTag(tag))
+            // Dégâts à l'ennemi
+            EnemyHealth enemyHealth = collision.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
             {
-                validCollision = true;
-                break;
+                enemyHealth.TakeDamage(damage);
+            }
+
+            // Système de perçage
+            currentPierceCount--;
+            if (currentPierceCount <= 0)
+            {
+                Destroy(gameObject);
             }
         }
-
-        if (!validCollision) return;
+        else if (collision.CompareTag("Obstacle"))
+        {
+            Destroy(gameObject);
+        }
     }
 
-    private bool IsInLayerMask(int layer, LayerMask layerMask)
+    // Optionnel : Pour les collisions avec des objets sans trigger
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        return layerMask == (layerMask | (1 << layer));
-    }
-
-    // Pour le débogage
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, transform.position + (Vector3)direction * 0.5f);
+        if (!collision.collider.isTrigger)
+        {
+            Destroy(gameObject);
+        }
     }
 }
