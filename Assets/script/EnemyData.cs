@@ -12,6 +12,9 @@ public class EnemyData
     internal float attackRange = 2f;
     internal float attackSpeed = 1f;
     public float detectionRange = 10f;
+    internal float attackCooldown;
+
+    public float moveSpeed { get; internal set; }
 }
 
 public enum EnemyType

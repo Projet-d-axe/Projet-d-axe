@@ -1,90 +1,132 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 /// <summary>
-/// Gère la santé du joueur, avec des événements pour les changements de santé et la mort.
+/// Système complet de santé du joueur avec gestion UI/effets
 /// </summary>
 public class PlayerHealth : MonoBehaviour
 {
-    [Header("Health Settings")]
+    // Configuration de base
+    [Header("Core Settings")]
     [SerializeField] private int maxHealth = 100;
-    [SerializeField] private int currentHealth;
+    [SerializeField] private float invincibilityDuration = 0.5f;
+    private int currentHealth;
+    private float lastDamageTime;
+    private bool isDead;
 
-    [Header("Events")]
-    public UnityEvent<int> OnHealthChanged; // Paramètre : nouvelle santé
+    // Références UI
+    [Header("UI References")]
+    [SerializeField] private Slider healthSlider;
+    [SerializeField] private Image damageVignette;
+    [SerializeField] private Text healthText;
+
+    // Effets
+    [Header("VFX/SFX")]
+    [SerializeField] private GameObject deathEffectPrefab;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip[] hurtSounds;
+    [SerializeField] private AudioClip deathSound;
+
+    // Événements
+    [System.Serializable]
+    public class HealthEvent : UnityEvent<int, int> {} // Current, Max
+    public HealthEvent OnHealthChanged;
     public UnityEvent OnDeath;
+    public UnityEvent OnDamageTaken;
 
-    // Propriétés pour accéder aux valeurs de santé
+    // Propriétés d'accès
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
+    public bool IsInvincible => Time.time < lastDamageTime + invincibilityDuration;
 
     private void Awake()
     {
-        // Initialiser la santé au maximum au démarrage
         currentHealth = maxHealth;
+        UpdateHealthUI();
     }
 
     /// <summary>
-    /// Applique des dégâts au joueur.
+    /// Applique des dégâts au joueur avec gestion d'invincibilité
     /// </summary>
-    /// <param name="damage">Montant des dégâts à infliger.</param>
     public void TakeDamage(int damage)
     {
-        if (currentHealth <= 0) return; // Déjà mort
+        if (isDead || IsInvincible) return;
 
-        currentHealth -= damage;
-        currentHealth = Mathf.Max(0, currentHealth); // Empêche la santé d'être négative
+        currentHealth = Mathf.Max(0, currentHealth - damage);
+        lastDamageTime = Time.time;
 
-        OnHealthChanged?.Invoke(currentHealth);
+        // Feedback
+        PlayHurtEffects();
+        UpdateHealthUI();
+        OnDamageTaken?.Invoke();
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+        if (currentHealth <= 0) Die();
     }
 
     /// <summary>
-    /// Soigne le joueur.
+    /// Soigne le joueur
     /// </summary>
-    /// <param name="healAmount">Montant de soin à appliquer.</param>
-    public void Heal(int healAmount)
+    public void Heal(int amount)
     {
-        currentHealth += healAmount;
-        currentHealth = Mathf.Min(currentHealth, maxHealth); // Empêche de dépasser la santé max
-        OnHealthChanged?.Invoke(currentHealth);
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        UpdateHealthUI();
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
     /// <summary>
-    /// Réinitialise la santé du joueur au maximum.
+    /// Réinitialise complètement la santé
     /// </summary>
     public void ResetHealth()
     {
         currentHealth = maxHealth;
-        OnHealthChanged?.Invoke(currentHealth);
-    }
-
-    /// <summary>
-    /// Modifie la santé maximale du joueur.
-    /// </summary>
-    /// <param name="newMaxHealth">Nouvelle valeur maximale de santé.</param>
-    /// <param name="shouldHeal">Si vrai, restaure également la santé actuelle.</param>
-    public void SetMaxHealth(int newMaxHealth, bool shouldHeal = false)
-    {
-        maxHealth = newMaxHealth;
-        if (shouldHeal) currentHealth = maxHealth;
-        OnHealthChanged?.Invoke(currentHealth);
+        isDead = false;
+        UpdateHealthUI();
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
     private void Die()
     {
+        isDead = true;
         OnDeath?.Invoke();
-        // Ici, vous pourriez ajouter d'autres logiques comme désactiver le joueur, jouer une animation, etc.
-        Debug.Log("Player has died!");
+        
+        // Effets
+        if (deathEffectPrefab) Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+        if (deathSound) audioSource.PlayOneShot(deathSound);
     }
 
-    // Méthode optionnelle pour vérifier si le joueur est mort
-    public bool IsDead()
+    // Méthodes d'effets visuels
+    private void PlayHurtEffects()
     {
-        return currentHealth <= 0;
+        // Son aléatoire
+        if (hurtSounds.Length > 0)
+        {
+            audioSource.PlayOneShot(hurtSounds[Random.Range(0, hurtSounds.Length)]);
+        }
+
+        // Vignette rouge
+        if (damageVignette)
+        {
+            damageVignette.color = new Color(1, 0, 0, 0.5f);
+            LeanTween.alpha(damageVignette.rectTransform, 0f, 0.5f).setEase(LeanTweenType.easeOutCubic);
+        }
+    }
+
+    private void UpdateHealthUI()
+    {
+        if (healthSlider) healthSlider.value = (float)currentHealth / maxHealth;
+        if (healthText) healthText.text = $"{currentHealth}/{maxHealth}";
+    }
+
+    /// <summary>
+    /// Modifie la santé maximale (pour power-ups)
+    /// </summary>
+    public void SetMaxHealth(int newMax, bool healToFull = true)
+    {
+        maxHealth = newMax;
+        if (healToFull) currentHealth = maxHealth;
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        UpdateHealthUI();
     }
 }

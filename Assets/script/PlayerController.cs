@@ -5,6 +5,7 @@ using System.Collections;
 [RequireComponent(typeof(CapsuleCollider2D))]
 public class PlayerController : MonoBehaviour 
 {
+    private PlayerHealth health;
     #region Movement Settings
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 8f;
@@ -67,6 +68,8 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        health = GetComponent<PlayerHealth>();
+        health.OnDeath.AddListener(HandleDeath);
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<CapsuleCollider2D>();
         originalColHeight = col.size.y;
@@ -90,6 +93,12 @@ public class PlayerController : MonoBehaviour
         ApplyJumpGravity();
         HandleCrouch();
     }
+
+    private void HandleDeath()
+{
+    // Désactiver les contrôles
+    enabled = false;
+}
 
     #region Inputs
     private void GetInputs()
