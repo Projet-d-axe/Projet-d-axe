@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CapsuleCollider2D))]
@@ -40,16 +41,24 @@ public class PlayerController : MonoBehaviour
 
     #region Advanced Movement
     [Header("Advanced")]
-    [SerializeField] private float fastFallSpeed = 30f; // Augmenté pour meilleur effet
+    [SerializeField] private float fastFallSpeed = 30f;
     [SerializeField] private float longJumpMultiplier = 1.8f;
     [SerializeField] private float airRollBoost = 1.3f;
     [SerializeField] private float jumpBufferTime = 0.1f;
     #endregion
 
+    #region Aim Settings
+    [Header("Aiming")]
+    [SerializeField] private bool aimWithMouse = true;
+    [SerializeField] private float aimLockMovementThreshold = 0.7f;
+    [SerializeField] private float aimMovementReduction = 0.5f;
+    private bool isAiming = false;
+    #endregion
+
     #region Components
     private Rigidbody2D rb;
     private CapsuleCollider2D col;
-    [SerializeField] private Transform graphics; // Serialisé pour assignation facile
+    [SerializeField] private Transform graphics;
     #endregion
 
     #region State
@@ -75,15 +84,28 @@ public class PlayerController : MonoBehaviour
         originalColHeight = col.size.y;
         ResetJumps();
         
-        // Fallback si graphics n'est pas assigné
         if (graphics == null) graphics = transform.Find("Graphics") ?? transform;
     }
 
     private void Update()
     {
         GetInputs();
-        HandleFlip(); // Maintenant dans Update pour plus de réactivité
-        HandleFastFall(); // Géré frame par frame
+        
+        if (!isAiming)
+        {
+            HandleFlip();
+        }
+        else
+        {
+            HandleAimDirection();
+        }
+        
+        HandleFastFall();
+    }
+
+    private void HandleFlip()
+    {
+        throw new NotImplementedException();
     }
 
     private void FixedUpdate()
@@ -95,15 +117,26 @@ public class PlayerController : MonoBehaviour
     }
 
     private void HandleDeath()
-{
-    // Désactiver les contrôles
-    enabled = false;
-}
+    {
+        enabled = false;
+    }
 
     #region Inputs
     private void GetInputs()
     {
-        moveInput = Input.GetAxisRaw("Horizontal");
+        // Vise avec clique droit
+        isAiming = Input.GetMouseButton(1);
+        
+        // Gestion du mouvement différente selon si on vise ou non
+        if (!isAiming)
+        {
+            moveInput = Input.GetAxisRaw("Horizontal");
+        }
+        else
+        {
+            float rawInput = Input.GetAxisRaw("Horizontal");
+            moveInput = Mathf.Abs(rawInput) > aimLockMovementThreshold ? 0 : rawInput * aimMovementReduction;
+        }
 
         // Jump Buffer
         if (Input.GetButtonDown("Jump"))
@@ -136,26 +169,30 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
-    #region Flip
-    private void HandleFlip()
+    #region Aiming
+    private void HandleAimDirection()
     {
-        if (Mathf.Abs(moveInput) > 0.01f) // Seuil très bas pour une réactivité maximale
+        if (aimWithMouse)
         {
-            bool shouldFaceRight = moveInput > 0;
+            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 direction = (mousePosition - transform.position).normalized;
+            
+            bool shouldFaceRight = direction.x > 0;
             if (shouldFaceRight != isFacingRight)
             {
                 Flip();
             }
         }
     }
+    #endregion
 
+    #region Flip
     private void Flip()
     {
         isFacingRight = !isFacingRight;
         Vector3 newScale = transform.localScale;
         newScale.x = Mathf.Abs(newScale.x) * (isFacingRight ? 1 : -1);
         transform.localScale = newScale;
-        
     }
     #endregion
 
@@ -189,7 +226,7 @@ public class PlayerController : MonoBehaviour
     #region Fast Fall 
     private void HandleFastFall()
     {
-        bool isPressingDown = Input.GetAxisRaw("Vertical") < -0.5f; // Seuil plus strict
+        bool isPressingDown = Input.GetAxisRaw("Vertical") < -0.5f;
         if (isPressingDown && !isGrounded && rb.linearVelocity.y < 0)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, -fastFallSpeed);
@@ -287,21 +324,16 @@ public class PlayerController : MonoBehaviour
         style.fontSize = 14;
         style.normal.textColor = Color.white;
 
-        GUILayout.BeginArea(new Rect(10, 10, 300, 250));
+        GUILayout.BeginArea(new Rect(10, 10, 300, 300));
         GUILayout.BeginVertical("box", style);
         
-        // État de base
         GUILayout.Label($"Position: {transform.position}");
-        GUILayout.Label($"Vitesse: X:{rb.linearVelocity.x:F1} Y:{rb.linearVelocity.y:F1}");
-        GUILayout.Label($"Au sol: {isGrounded}", GetStyle(isGrounded));
-        GUILayout.Label($"Direction: {(isFacingRight ? "Droite" : "Gauche")}");
+        GUILayout.Label($"Velocity: X:{rb.linearVelocity.x:F1} Y:{rb.linearVelocity.y:F1}");
+        GUILayout.Label($"Grounded: {isGrounded}", GetStyle(isGrounded));
+        GUILayout.Label($"Facing: {(isFacingRight ? "Right" : "Left")}");
+        GUILayout.Label($"Aiming: {isAiming}", GetStyle(isAiming));
+        GUILayout.Label($"Move Input: {moveInput:F2}");
 
-        // Mouvements spéciaux
-        GUILayout.Label($"\nFast Fall: {Input.GetAxisRaw("Vertical") < -0.5f && !isGrounded}", 
-                      GetStyle(Input.GetAxisRaw("Vertical") < -0.5f && !isGrounded));
-        GUILayout.Label($"Flip Actif: {Mathf.Abs(moveInput) > 0.01f}", 
-                      GetStyle(Mathf.Abs(moveInput) > 0.01f));
-        
         GUILayout.EndVertical();
         GUILayout.EndArea();
     }
