@@ -51,7 +51,7 @@ public class EnemyController : MonoBehaviour
 
         if (data != null)
         {
-            agent.speed = data.moveSpeed;
+            agent.speed = data.speed;
             attackRange = data.attackRange;
         }
     }
