@@ -1,235 +1,241 @@
 using UnityEngine;
+using TMPro;
 using System.Collections;
-using System;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CapsuleCollider2D))]
 public class PlayerController : MonoBehaviour 
 {
-    private PlayerHealth health;
-    #region Movement Settings
+    //=== Références ===//
+    [Header("Références")]
+    [SerializeField] private Transform _graphics;
+    [SerializeField] private Transform _groundCheck;
+    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private TextMeshProUGUI _ammoText;
+    [SerializeField] private TextMeshProUGUI _bulletTypeText;
+    [SerializeField] private Transform _aimPivot;
+    [SerializeField] private LayerMask _enemyLayer;
+    private Rigidbody2D _rb;
+    private CapsuleCollider2D _col;
+    private Weapon _weapon;
+    private PlayerHealth _health;
+
+    //=== Paramètres de Mouvement ===//
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 8f;
-    [SerializeField] private float acceleration = 15f;
-    [SerializeField] private float deceleration = 20f;
-    [Range(0,1)] [SerializeField] private float airControl = 0.6f;
-    #endregion
+    [SerializeField] private float _moveSpeed = 8f;
+    [SerializeField] private float _acceleration = 15f;
+    [SerializeField] private float _deceleration = 20f;
+    [Range(0,1)] [SerializeField] private float _airControl = 0.6f;
 
-    #region Jump Settings
+    //=== Saut ===//
     [Header("Jump")]
-    [SerializeField] private float jumpForce = 16f;
-    [SerializeField] private float fallMultiplier = 2.5f;
-    [SerializeField] private float lowJumpMultiplier = 2f;
-    [SerializeField] private float coyoteTime = 0.15f;
-    [SerializeField] private int maxAirJumps = 1;
-    #endregion
+    [SerializeField] private float _jumpForce = 16f;
+    [SerializeField] private float _fallMultiplier = 2.5f;
+    [SerializeField] private float _lowJumpMultiplier = 2f;
+    [SerializeField] private float _coyoteTime = 0.15f;
+    [SerializeField] private int _maxAirJumps = 1;
 
-    #region Crouch Settings
+    //=== Crouch ===//
     [Header("Crouch")]
-    [SerializeField] private float crouchHeight = 0.5f;
-    [SerializeField] private float crouchSpeed = 10f;
-    [SerializeField] private float crouchSpeedMultiplier = 0.4f;
-    #endregion
+    [SerializeField] private float _crouchHeight = 0.5f;
+    [SerializeField] private float _crouchSpeed = 10f;
+    [SerializeField] private float _crouchSpeedMultiplier = 0.4f;
 
-    #region Roll Settings
+    //=== Roulade ===//
     [Header("Roll")]
-    [SerializeField] private float rollDistance = 4f;
-    [SerializeField] private float rollDuration = 0.2f;
-    [SerializeField] private float rollCooldown = 0.5f;
-    [SerializeField] private LayerMask enemyLayer;
-    #endregion
+    [SerializeField] private float _rollDistance = 4f;
+    [SerializeField] private float _rollDuration = 0.2f;
+    [SerializeField] private float _rollCooldown = 0.5f;
 
-    #region Advanced Movement
+    //=== Mouvement Avancé ===//
     [Header("Advanced")]
-    [SerializeField] private float fastFallSpeed = 30f;
-    [SerializeField] private float longJumpMultiplier = 1.8f;
-    [SerializeField] private float airRollBoost = 1.3f;
-    [SerializeField] private float jumpBufferTime = 0.1f;
-    #endregion
+    [SerializeField] private float _fastFallSpeed = 30f;
+    [SerializeField] private float _jumpBufferTime = 0.1f;
 
-    #region Aim Settings
+    //=== Visée ===//
     [Header("Aiming")]
-    [SerializeField] private bool aimWithMouse = true;
-    [SerializeField] private float aimLockMovementThreshold = 0.7f;
-    [SerializeField] private float aimMovementReduction = 0.5f;
-    private bool isAiming = false;
-    #endregion
+    [SerializeField] private bool _aimWithMouse = true;
+    [SerializeField] private float _aimLockMovementThreshold = 0.7f;
+    [SerializeField] private float _aimMovementReduction = 0.5f;
+    [SerializeField] private float _aimRotationOffset = 90f;
 
-    #region Components
-    private Rigidbody2D rb;
-    private CapsuleCollider2D col;
-    [SerializeField] private Transform graphics;
-    #endregion
+    //=== États ===//
+    private bool _isGrounded;
+    private bool _isCrouching;
+    private bool _isRolling;
+    private bool _isFacingRight = true;
+    private bool _isJumpCut;
+    private bool _isAiming;
+    private int _remainingJumps;
+    private float _lastGroundedTime;
+    private float _nextRollTime;
+    private float _originalColHeight;
+    private float _moveInput;
+    private float _jumpBufferCounter;
+    private Vector2 _aimDirection;
 
-    #region State
-    private bool isGrounded;
-    private bool isCrouching;
-    private bool isRolling;
-    private bool isFacingRight = true;
-    private bool isJumpCut;
-    private int remainingJumps;
-    private float lastGroundedTime;
-    private float nextRollTime;
-    private float originalColHeight;
-    private float moveInput;
-    private float jumpBufferCounter;
-    #endregion
-
-    private void Awake()
+    void Awake()
     {
-        health = GetComponent<PlayerHealth>();
-        health.OnDeath.AddListener(HandleDeath);
-        rb = GetComponent<Rigidbody2D>();
-        col = GetComponent<CapsuleCollider2D>();
-        originalColHeight = col.size.y;
+        _rb = GetComponent<Rigidbody2D>();
+        _col = GetComponent<CapsuleCollider2D>();
+        _health = GetComponent<PlayerHealth>();
+        _weapon = GetComponentInChildren<Weapon>();
+        _originalColHeight = _col.size.y;
+
+        if (_graphics == null) _graphics = transform;
+        if (_health != null) _health.OnDeath.AddListener(HandleDeath);
+
         ResetJumps();
-        
-        if (graphics == null) graphics = transform.Find("Graphics") ?? transform;
     }
 
-    private void Update()
+    void Update()
     {
         GetInputs();
-        
-        if (!isAiming)
-        {
-            HandleFlip();
-        }
-        else
-        {
-            HandleAimDirection();
-        }
-        
-        HandleFastFall();
+        HandleAiming();
+        UpdateUI();
     }
 
-    private void HandleFlip()
-    {
-        throw new NotImplementedException();
-    }
-
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         CheckGrounded();
-        if (!isRolling) HandleMovement();
+        if (!_isRolling) HandleMovement();
         ApplyJumpGravity();
         HandleCrouch();
-    }
-
-    private void HandleDeath()
-    {
-        enabled = false;
     }
 
     #region Inputs
     private void GetInputs()
     {
-        // Vise avec clique droit
-        isAiming = Input.GetMouseButton(1);
-        
-        // Gestion du mouvement différente selon si on vise ou non
-        if (!isAiming)
+        // Vise avec clic droit
+        _isAiming = Input.GetMouseButton(1);
+
+        // Mouvement
+        if (!_isAiming)
         {
-            moveInput = Input.GetAxisRaw("Horizontal");
+            _moveInput = Input.GetAxisRaw("Horizontal");
         }
         else
         {
             float rawInput = Input.GetAxisRaw("Horizontal");
-            moveInput = Mathf.Abs(rawInput) > aimLockMovementThreshold ? 0 : rawInput * aimMovementReduction;
+            _moveInput = Mathf.Abs(rawInput) > _aimLockMovementThreshold ? 0 : rawInput * _aimMovementReduction;
         }
 
-        // Jump Buffer
+        // Tir avec clic gauche
+        if (Input.GetMouseButton(0) && _weapon != null)
+        {
+            _weapon.AttemptShoot(_aimDirection);
+        }
+
+        // Changement de type de balle
+        if (Input.GetKeyDown(KeyCode.Alpha1)) _weapon?.SetBulletType(Weapon.BulletType.Normal);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) _weapon?.SetBulletType(Weapon.BulletType.Platform);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) _weapon?.SetBulletType(Weapon.BulletType.Piercing);
+
+        // Saut
+        if (_jumpBufferCounter > 0 && CanJump())
+        {
+            TryJump();
+            _jumpBufferCounter = 0;
+        }
         if (Input.GetButtonDown("Jump"))
-            jumpBufferCounter = jumpBufferTime;
+            _jumpBufferCounter = _jumpBufferTime;
         else
-            jumpBufferCounter -= Time.deltaTime;
+            _jumpBufferCounter -= Time.deltaTime;
 
-        if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0)
-            isJumpCut = true;
+        if (Input.GetButtonUp("Jump") && _rb.linearVelocity.y > 0)
+            _isJumpCut = true;
 
-        isCrouching = Input.GetAxisRaw("Vertical") < 0 && isGrounded;
+        // Crouch
+        _isCrouching = Input.GetAxisRaw("Vertical") < 0 && _isGrounded;
 
+        // Roulade
         if (Input.GetButtonDown("Fire3") && CanRoll())
             StartCoroutine(Roll());
     }
     #endregion
 
-    #region Movement
+    #region Mouvement
     private void HandleMovement()
     {
-        float currentMaxSpeed = isCrouching ? moveSpeed * crouchSpeedMultiplier : moveSpeed;
-        float targetSpeed = moveInput * currentMaxSpeed;
-        float accel = (Mathf.Abs(moveInput) > 0.1f) ? acceleration : deceleration;
-        float control = isGrounded ? 1f : airControl;
+        float currentMaxSpeed = _isCrouching ? _moveSpeed * _crouchSpeedMultiplier : _moveSpeed;
+        float targetSpeed = _moveInput * currentMaxSpeed;
+        float accelRate = (Mathf.Abs(_moveInput) > 0.1f) ? _acceleration : _deceleration;
+        float control = _isGrounded ? 1f : _airControl;
 
-        rb.linearVelocity = new Vector2(
-            Mathf.Lerp(rb.linearVelocity.x, targetSpeed, accel * control * Time.fixedDeltaTime),
-            rb.linearVelocity.y
+        _rb.linearVelocity = new Vector2(
+            Mathf.Lerp(_rb.linearVelocity.x, targetSpeed, accelRate * control * Time.fixedDeltaTime),
+            _rb.linearVelocity.y
         );
-    }
-    #endregion
 
-    #region Aiming
-    private void HandleAimDirection()
+        if (!_isAiming && _moveInput != 0)
+            CheckFlip();
+    }
+
+    private void CheckFlip()
     {
-        if (aimWithMouse)
-        {
-            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 direction = (mousePosition - transform.position).normalized;
-            
-            bool shouldFaceRight = direction.x > 0;
-            if (shouldFaceRight != isFacingRight)
-            {
-                Flip();
-            }
-        }
+        bool shouldFlip = (_moveInput > 0 && !_isFacingRight) || (_moveInput < 0 && _isFacingRight);
+        if (shouldFlip) Flip();
     }
-    #endregion
 
-    #region Flip
     private void Flip()
     {
-        isFacingRight = !isFacingRight;
-        Vector3 newScale = transform.localScale;
-        newScale.x = Mathf.Abs(newScale.x) * (isFacingRight ? 1 : -1);
-        transform.localScale = newScale;
+        _isFacingRight = !_isFacingRight;
+        Vector3 scale = transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
     }
     #endregion
 
-    #region Jump
-    private void TryJump()
+    #region Visée
+    private void HandleAiming()
     {
-        if (CanJump())
+        if (_weapon == null || _aimPivot == null) return;
+
+        // Calcul de la direction de visée
+        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        _aimDirection = (mousePos - (Vector2)_aimPivot.position).normalized;
+
+        // Rotation de l'arme
+        float angle = Mathf.Atan2(_aimDirection.y, _aimDirection.x) * Mathf.Rad2Deg;
+        _weapon.transform.rotation = Quaternion.Euler(0, 0, angle + _aimRotationOffset);
+
+        // Flip du personnage en visée
+        if (_isAiming)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            remainingJumps--;
-            isJumpCut = false;
+            bool shouldFaceRight = _aimDirection.x > 0;
+            if (shouldFaceRight != _isFacingRight) Flip();
         }
     }
+    #endregion
 
-    private bool CanJump()
+    #region Saut
+    private bool CanJump() => (_isGrounded || Time.time < _lastGroundedTime + _coyoteTime || _remainingJumps > 0) && !_isRolling;
+
+    private void TryJump()
     {
-        return (isGrounded || Time.time < lastGroundedTime + coyoteTime || remainingJumps > 0) && !isRolling;
+        _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
+        _remainingJumps--;
+        _isJumpCut = false;
     }
 
     private void ApplyJumpGravity()
     {
-        if (rb.linearVelocity.y < 0)
-            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.fixedDeltaTime;
-        else if (rb.linearVelocity.y > 0 && isJumpCut)
-            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.fixedDeltaTime;
+        if (_rb.linearVelocity.y < 0)
+            _rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (_fallMultiplier - 1) * Time.fixedDeltaTime;
+        else if (_rb.linearVelocity.y > 0 && _isJumpCut)
+            _rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (_lowJumpMultiplier - 1) * Time.fixedDeltaTime;
     }
 
-    private void ResetJumps() => remainingJumps = maxAirJumps;
+    private void ResetJumps() => _remainingJumps = _maxAirJumps;
     #endregion
 
-    #region Fast Fall 
+    #region Chute Rapide
     private void HandleFastFall()
     {
         bool isPressingDown = Input.GetAxisRaw("Vertical") < -0.5f;
-        if (isPressingDown && !isGrounded && rb.linearVelocity.y < 0)
+        if (isPressingDown && !_isGrounded && _rb.linearVelocity.y < 0)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -fastFallSpeed);
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, -_fastFallSpeed);
         }
     }
     #endregion
@@ -237,39 +243,39 @@ public class PlayerController : MonoBehaviour
     #region Crouch
     private void HandleCrouch()
     {
-        if (isCrouching)
+        if (_isCrouching)
         {
-            col.size = new Vector2(
-                col.size.x,
-                Mathf.MoveTowards(col.size.y, crouchHeight, crouchSpeed * Time.fixedDeltaTime)
+            _col.size = new Vector2(
+                _col.size.x,
+                Mathf.MoveTowards(_col.size.y, _crouchHeight, _crouchSpeed * Time.fixedDeltaTime)
             );
         }
         else
         {
-            col.size = new Vector2(
-                col.size.x,
-                Mathf.MoveTowards(col.size.y, originalColHeight, crouchSpeed * Time.fixedDeltaTime)
+            _col.size = new Vector2(
+                _col.size.x,
+                Mathf.MoveTowards(_col.size.y, _originalColHeight, _crouchSpeed * Time.fixedDeltaTime)
             );
         }
     }
     #endregion
 
-    #region Roll
-    private bool CanRoll() => Time.time >= nextRollTime && !isRolling;
+    #region Roulade
+    private bool CanRoll() => Time.time >= _nextRollTime && !_isRolling;
 
     private IEnumerator Roll()
     {
-        isRolling = true;
-        float direction = isFacingRight ? 1 : -1;
+        _isRolling = true;
+        float direction = _isFacingRight ? 1 : -1;
         float startTime = Time.time;
 
         Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), true);
 
-        while (Time.time < startTime + rollDuration)
+        while (Time.time < startTime + _rollDuration)
         {
-            float progress = (Time.time - startTime) / rollDuration;
-            float currentSpeed = Mathf.Lerp(rollDistance / rollDuration, 0, progress);
-            rb.linearVelocity = new Vector2(direction * currentSpeed, rb.linearVelocity.y);
+            float progress = (Time.time - startTime) / _rollDuration;
+            float currentSpeed = Mathf.Lerp(_rollDistance / _rollDuration, 0, progress);
+            _rb.linearVelocity = new Vector2(direction * currentSpeed, _rb.linearVelocity.y);
             yield return null;
         }
 
@@ -278,46 +284,77 @@ public class PlayerController : MonoBehaviour
 
     private void EndRoll()
     {
-        isRolling = false;
-        nextRollTime = Time.time + rollCooldown;
+        _isRolling = false;
+        _nextRollTime = Time.time + _rollCooldown;
         Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Enemy"), false);
     }
     #endregion
 
-    #region Ground Check
+    #region Vérification Sol
     private void CheckGrounded()
     {
-        bool wasGrounded = isGrounded;
+        bool wasGrounded = _isGrounded;
         RaycastHit2D hit = Physics2D.BoxCast(
-            col.bounds.center,
-            new Vector2(col.bounds.size.x * 0.9f, 0.1f),
+            _col.bounds.center,
+            new Vector2(_col.bounds.size.x * 0.9f, 0.1f),
             0f,
             Vector2.down,
-            col.bounds.extents.y + 0.05f,
-            LayerMask.GetMask("Ground")
+            _col.bounds.extents.y + 0.05f,
+            _groundLayer
         );
         
-        isGrounded = hit.collider != null;
+        _isGrounded = hit.collider != null;
 
-        if (isGrounded && !wasGrounded) 
+        if (_isGrounded && !wasGrounded)
         {
             ResetJumps();
-            isJumpCut = false;
+            _isJumpCut = false;
         }
-        else if (!isGrounded && wasGrounded) 
+        else if (!_isGrounded && wasGrounded)
         {
-            lastGroundedTime = Time.time;
-        }
-
-        if (jumpBufferCounter > 0 && CanJump())
-        {
-            TryJump();
-            jumpBufferCounter = 0;
+            _lastGroundedTime = Time.time;
         }
     }
     #endregion
 
-    #region Debug GUI
+    #region UI
+    private void UpdateUI()
+    {
+        if (_weapon == null) return;
+
+        // Munitions
+        if (_ammoText != null)
+        {
+            _ammoText.text = $"{_weapon.CurrentAmmo}/{_weapon.MaxAmmo}";
+            _ammoText.color = _weapon.CurrentAmmo > 0 ? Color.green : Color.red;
+        }
+
+        // Type de balle
+        if (_bulletTypeText != null)
+        {
+            _bulletTypeText.text = _weapon.CurrentBulletType.ToString();
+            _bulletTypeText.color = GetBulletColor(_weapon.CurrentBulletType);
+        }
+    }
+
+    private Color GetBulletColor(Weapon.BulletType type)
+    {
+        return type switch
+        {
+            Weapon.BulletType.Normal => Color.white,
+            Weapon.BulletType.Platform => Color.blue,
+            Weapon.BulletType.Piercing => Color.red,
+            _ => Color.gray
+        };
+    }
+    #endregion
+
+    #region Autres
+    private void HandleDeath()
+    {
+        enabled = false;
+    }
+
     private void OnGUI()
     {
         GUIStyle style = new GUIStyle(GUI.skin.box);
@@ -328,21 +365,20 @@ public class PlayerController : MonoBehaviour
         GUILayout.BeginVertical("box", style);
         
         GUILayout.Label($"Position: {transform.position}");
-        GUILayout.Label($"Velocity: X:{rb.linearVelocity.x:F1} Y:{rb.linearVelocity.y:F1}");
-        GUILayout.Label($"Grounded: {isGrounded}", GetStyle(isGrounded));
-        GUILayout.Label($"Facing: {(isFacingRight ? "Right" : "Left")}");
-        GUILayout.Label($"Aiming: {isAiming}", GetStyle(isAiming));
-        GUILayout.Label($"Move Input: {moveInput:F2}");
+        GUILayout.Label($"Velocity: X:{_rb.linearVelocity.x:F1} Y:{_rb.linearVelocity.y:F1}");
+        GUILayout.Label($"Grounded: {_isGrounded}");
+        GUILayout.Label($"Facing: {(_isFacingRight ? "Right" : "Left")}");
+        GUILayout.Label($"Aiming: {_isAiming}");
+        GUILayout.Label($"Move Input: {_moveInput:F2}");
+
+        if (_weapon != null)
+        {
+            GUILayout.Label($"Bullet Type: {_weapon.CurrentBulletType}");
+            GUILayout.Label($"Ammo: {_weapon.CurrentAmmo}/{_weapon.MaxAmmo}");
+        }
 
         GUILayout.EndVertical();
         GUILayout.EndArea();
-    }
-
-    private GUIStyle GetStyle(bool condition)
-    {
-        GUIStyle style = new GUIStyle(GUI.skin.label);
-        style.normal.textColor = condition ? Color.green : Color.red;
-        return style;
     }
     #endregion
 }

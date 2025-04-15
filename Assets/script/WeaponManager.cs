@@ -1,34 +1,30 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections; // Ajout de ce namespace pour IEnumerator
+using System.Collections;
 
 public class WeaponManager : MonoBehaviour
 {
     [System.Serializable]
     public class Weapon
     {
+        public string weaponName;
         public GameObject weaponObject;
-        public int maxAmmo = 30;
-        public int damage = 10;
-        public float fireRate = 0.2f;
-        public AudioClip shootSound;
-        public AudioClip reloadSound;
-        public ParticleSystem muzzleFlash;
+        public int maxAmmo;
         [HideInInspector] public int currentAmmo;
     }
 
     public Weapon[] weapons;
-    private int currentWeaponIndex = 0;
-    private float nextFireTime = 0f;
-    private AudioSource audioSource;
-    private Animator animator;
+    public float switchDelay = 0.3f;
+    
+    private int currentWeaponIndex;
+    private bool isSwitching;
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
-        animator = GetComponent<Animator>();
+        InitializeWeapons();
+    }
 
-        // Initialiser les armes
+    void InitializeWeapons()
+    {
         for (int i = 0; i < weapons.Length; i++)
         {
             weapons[i].currentAmmo = weapons[i].maxAmmo;
@@ -38,101 +34,51 @@ public class WeaponManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.X) && Time.time >= nextFireTime)
-        {
-            Shoot();
-        }
+        if (isSwitching) return;
 
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            NextWeapon();
-        }
-
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Reload();
-        }
+        HandleWeaponSwitchInput();
     }
 
-    void Shoot()
+    void HandleWeaponSwitchInput()
     {
-        Weapon currentWeapon = weapons[currentWeaponIndex];
-        
-        if (currentWeapon.currentAmmo <= 0)
+        // Changement avec molette
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll != 0)
         {
-            // Jouer un son "clic" quand pas de munitions
-            return;
+            int newIndex = currentWeaponIndex + (scroll > 0 ? -1 : 1);
+            if (newIndex < 0) newIndex = weapons.Length - 1;
+            else if (newIndex >= weapons.Length) newIndex = 0;
+            
+            StartCoroutine(SwitchWeapon(newIndex));
         }
 
-        currentWeapon.currentAmmo--;
-        nextFireTime = Time.time + currentWeapon.fireRate;
-
-        // Effets
-        if (currentWeapon.muzzleFlash != null)
-            currentWeapon.muzzleFlash.Play();
-        
-        if (currentWeapon.shootSound != null)
-            audioSource.PlayOneShot(currentWeapon.shootSound);
-
-        // Animation
-        animator.SetTrigger("Shoot");
-
-        // Logique de tir
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, 100f))
+        // Changement avec touches 1-9
+        for (int i = 0; i < weapons.Length; i++)
         {
-            if (hit.collider.CompareTag("Enemy"))
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
             {
-                hit.collider.GetComponent<EnemyHealth>().TakeDamage(currentWeapon.damage);
+                StartCoroutine(SwitchWeapon(i));
             }
         }
     }
 
-    void Reload()
+    IEnumerator SwitchWeapon(int newIndex)
     {
-        Weapon currentWeapon = weapons[currentWeaponIndex];
-        
-        if (currentWeapon.currentAmmo == currentWeapon.maxAmmo) return;
+        if (newIndex == currentWeaponIndex || newIndex < 0 || newIndex >= weapons.Length)
+            yield break;
 
-        animator.SetTrigger("Reload");
-        if (currentWeapon.reloadSound != null)
-            audioSource.PlayOneShot(currentWeapon.reloadSound);
+        isSwitching = true;
 
-        currentWeapon.currentAmmo = currentWeapon.maxAmmo;
-    }
-
-    void SwitchWeapon(int newIndex)
-    {
-        if (newIndex == currentWeaponIndex) return;
-
-        animator.SetTrigger("SwitchWeapon");
-        StartCoroutine(SwitchWeaponDelay(newIndex));
-    }
-
-    // Coroutine pour le changement d'arme avec délai
-    IEnumerator SwitchWeaponDelay(int newIndex)
-    {
-        yield return new WaitForSeconds(0.2f);
+        // Désactiver l'arme actuelle
         weapons[currentWeaponIndex].weaponObject.SetActive(false);
-        
+
+        // Attendre le délai
+        yield return new WaitForSeconds(switchDelay);
+
+        // Activer la nouvelle arme
         currentWeaponIndex = newIndex;
         weapons[currentWeaponIndex].weaponObject.SetActive(true);
-    }
 
-    void NextWeapon()
-    {
-        int newIndex = (currentWeaponIndex + 1) % weapons.Length;
-        SwitchWeapon(newIndex);
-    }
-
-    public string GetCurrentAmmoText()
-    {
-        Weapon w = weapons[currentWeaponIndex];
-        return $"{w.currentAmmo} / {w.maxAmmo}";
-    }
-
-    public string GetCurrentWeaponName()
-    {
-        return weapons[currentWeaponIndex].weaponObject.name;
+        isSwitching = false;
     }
 }

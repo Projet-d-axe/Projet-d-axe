@@ -1,25 +1,14 @@
 using UnityEngine;
 
-[System.Serializable]
-public class EnemyData
+[CreateAssetMenu(fileName = "NewEnemyData", menuName = "Enemy/Enemy Data")]
+public class EnemyData : ScriptableObject
 {
-    public string enemyName;
-    public int pv = 100;
+    public float moveSpeed = 3.5f;
+    public float attackRange = 2f;
+    public float attackCooldown = 1.5f;
+    public float detectionRange = 15f;
+    public float groundCheckDistance = 0.2f;
+    public float patrolWaitTime = 2f;
     public int damage = 10;
-    public float speed = 3.5f;
-    public GameObject prefab;
-    public EnemyType type;
-    internal float attackRange = 2f;
-    internal float attackSpeed = 1f;
-    public float detectionRange = 10f;
-    internal float attackCooldown;
-
-    public float moveSpeed { get; internal set; }
-}
-
-public enum EnemyType
-{
-    Melee,
-    Ranged,
-    Boss
+    [HideInInspector] public float lastAttackTime;
 }

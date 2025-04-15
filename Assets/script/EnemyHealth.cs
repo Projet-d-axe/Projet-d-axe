@@ -1,26 +1,32 @@
-using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections;
 
-public class EnemyHealth : MonoBehaviour
+public class EnemyHealth : MonoBehaviour, IDamageable
 {
-    [Header("Settings")]
+    [Header("Health Settings")]
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private float invulnerabilityDuration = 0.5f;
+    [SerializeField] private bool destroyOnDeath = true;
 
     [Header("Feedback")]
     [SerializeField] private GameObject deathEffect;
     [SerializeField] private AudioClip deathSound;
+    [SerializeField] private AudioClip hitSound;
 
+    [Header("Events")]
     public UnityEvent onDeath;
-    public UnityEvent<float> onHealthChanged; // Passes health percentage
+    public UnityEvent<float> onHealthChanged; // Passes health percentage (0-1)
+    public UnityEvent onHit;
 
     private int currentHealth;
     private bool isInvulnerable;
     private AudioSource audioSource;
 
-    public int CurrentHealth { get; internal set; }
+    public int CurrentHealth => currentHealth;
+    public float HealthPercentage => (float)currentHealth / maxHealth;
+
+    public bool IsAlive => throw new System.NotImplementedException();
 
     private void Awake()
     {
@@ -28,12 +34,19 @@ public class EnemyHealth : MonoBehaviour
         audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
     }
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(int damage)
     {
         if (isInvulnerable || currentHealth <= 0) return;
 
-        currentHealth = Mathf.Max(0, currentHealth - amount);
-        onHealthChanged.Invoke(GetHealthPercentage());
+        currentHealth = Mathf.Max(0, currentHealth - damage);
+        onHealthChanged.Invoke(HealthPercentage);
+        onHit.Invoke();
+
+        // Play hit sound if not dying
+        if (currentHealth > 0 && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
+        }
 
         if (currentHealth <= 0)
         {
@@ -54,22 +67,41 @@ public class EnemyHealth : MonoBehaviour
 
     public void Die()
     {
-        Instantiate(deathEffect, transform.position, Quaternion.identity);
-        audioSource.PlayOneShot(deathSound);
+        if (deathEffect != null)
+        {
+            Instantiate(deathEffect, transform.position, Quaternion.identity);
+        }
+
+        if (deathSound != null)
+        {
+            audioSource.PlayOneShot(deathSound);
+        }
+
         onDeath.Invoke();
-        Destroy(gameObject);
+
+        if (destroyOnDeath)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
     }
 
-    public void SetMaxHealth(int value, bool v) => maxHealth = value;
-    public float GetHealthPercentage() => (float)currentHealth / maxHealth;
-
-    internal int GetCurrentHealth()
+    public void Heal(int amount)
     {
-        throw new NotImplementedException();
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        onHealthChanged.Invoke(HealthPercentage);
     }
 
-    internal void SetMaxHealth(int pv)
+    public void SetMaxHealth(int newMaxHealth, bool healToFull = false)
     {
-        throw new NotImplementedException();
+        maxHealth = newMaxHealth;
+        if (healToFull)
+        {
+            currentHealth = maxHealth;
+        }
+        onHealthChanged.Invoke(HealthPercentage);
     }
 }

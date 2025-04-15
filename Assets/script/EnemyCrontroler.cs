@@ -1,214 +1,200 @@
 using UnityEngine;
-using UnityEngine.AI;
 using System.Collections;
+using System;
 
-[RequireComponent(typeof(NavMeshAgent))]
-[RequireComponent(typeof(Collider))]
 public class EnemyController : MonoBehaviour
 {
-    public float moveSpeed = 3.5f;
-    [Header("Références")]
-    [SerializeField] private EnemyData data;
+    [Header("Configuration")]
+    public EnemyData data;
+    public Transform[] patrolPoints;
+    public float respawnHeightThreshold = -10f;
+    public float groundCheckDistance = 0.2f;
+
+    [Header("References")]
     [SerializeField] private Transform player;
     [SerializeField] private Animator animator;
     [SerializeField] private GameObject deathEffect;
-    private NavMeshAgent agent;
-    private Collider enemyCollider;
+    [SerializeField] private LayerMask groundLayer;
 
-    [Header("Paramètres de Détection")]
-    [SerializeField] private float detectionRange = 15f;
-    [SerializeField] private float forgetRange = 20f;
-    private bool playerDetected;
-
-    [Header("Combat")]
-    [SerializeField] private float attackRange = 2f;
-    [SerializeField] private float attackCooldown = 1.5f;
-    [SerializeField] private LayerMask playerLayer;
-    private float lastAttackTime;
-    private bool isAttacking;
-
-    [Header("Patrouille")]
-    [SerializeField] private Transform[] patrolPoints;
-    [SerializeField] private float waitTime = 2f;
-    private int currentPatrolIndex;
-    private bool isWaiting;
-    private Vector3 lastKnownPlayerPosition;
-
-    [Header("Physique")]
-    [SerializeField] private float groundCheckDistance = 0.2f;
-    private bool isGrounded;
+    private Rigidbody rb;
+    private Vector3 spawnPosition;
+    private int currentPatrolIndex = 0;
+    private bool isWaiting = false;
+    private bool isGrounded = true;
+    private float fallTimer = 0f;
+    private const float maxFallTime = 2f;
 
     private void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
-        enemyCollider = GetComponent<Collider>();
-        
-        // Configuration initiale
-        agent.radius = 0.5f;
-        agent.height = 1.8f;
-        agent.baseOffset = 0.1f;
-        agent.stoppingDistance = 1f;
-
-        if (data != null)
-        {
-            agent.speed = data.moveSpeed;
-            attackRange = data.attackRange;
-        }
+        rb = GetComponent<Rigidbody>();
+        spawnPosition = transform.position;
     }
 
     private void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        StartCoroutine(GroundCheckRoutine());
+        if (!player) player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        InitializePatrol();
+    }
+
+    private void InitializePatrol()
+    {
+        throw new NotImplementedException();
     }
 
     private void Update()
     {
-        if (!isGrounded) return;
+        if (!isGrounded)
+        {
+            HandleFalling();
+            return;
+        }
+
+        UpdateAIBehavior();
+        CheckGroundStatus();
+    }
+
+    private void FixedUpdate()
+    {
+        // Applique une gravité manuelle si nécessaire
+        if (!isGrounded && rb)
+        {
+            rb.AddForce(Physics.gravity * rb.mass * 2f); // Chute plus rapide
+        }
+    }
+
+    private void CheckGroundStatus()
+    {
+        isGrounded = Physics.Raycast(
+            transform.position + Vector3.up * 0.1f,
+            Vector3.down,
+            groundCheckDistance,
+            groundLayer
+        );
+    }
+
+    private void HandleFalling()
+    {
+        fallTimer += Time.deltaTime;
+        if (fallTimer > maxFallTime || transform.position.y < respawnHeightThreshold)
+        {
+            RespawnEnemy();
+        }
+    }
+
+    private void UpdateAIBehavior()
+    {
+        if (!player) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        
-        // Système de mémoire du joueur
-        if (distanceToPlayer <= detectionRange)
-        {
-            playerDetected = true;
-            lastKnownPlayerPosition = player.position;
-        }
-        else if (distanceToPlayer > forgetRange)
-        {
-            playerDetected = false;
-        }
 
-        if (playerDetected)
+        if (distanceToPlayer <= data.detectionRange)
         {
-            EngagePlayer();
+            ChasePlayer(distanceToPlayer);
         }
-        else if (patrolPoints.Length > 0)
+        else if (patrolPoints != null && patrolPoints.Length > 0)
         {
             Patrol();
         }
     }
 
-    private void EngagePlayer()
+    private void ChasePlayer(float distanceToPlayer)
     {
-        float distance = Vector3.Distance(transform.position, lastKnownPlayerPosition);
-        
-        // Rotation progressive vers le joueur
-        Vector3 direction = (lastKnownPlayerPosition - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 8f);
+        Vector3 direction = (player.position - transform.position).normalized;
+        direction.y = 0; // Ignore la différence de hauteur
 
-        if (distance <= attackRange)
+        // Déplacement vers le joueur
+        transform.position += direction * data.moveSpeed * Time.deltaTime;
+        transform.rotation = Quaternion.LookRotation(direction); // Rotation fluide
+
+        animator.SetBool("IsMoving", true);
+
+        if (distanceToPlayer <= data.attackRange)
         {
-            agent.isStopped = true;
             TryAttack();
         }
-        else
-        {
-            agent.isStopped = false;
-            agent.SetDestination(lastKnownPlayerPosition);
-        }
-
-        animator.SetBool("IsMoving", !agent.isStopped);
     }
 
     private void TryAttack()
     {
-        if (Time.time >= lastAttackTime + attackCooldown && !isAttacking)
+        if (Time.time >= data.lastAttackTime + data.attackCooldown)
         {
-            StartCoroutine(AttackRoutine());
-            lastAttackTime = Time.time;
+            StartCoroutine(AttackSequence());
+            data.lastAttackTime = Time.time;
         }
     }
 
-    private IEnumerator AttackRoutine()
+    private IEnumerator AttackSequence()
     {
-        isAttacking = true;
         animator.SetTrigger("Attack");
+        yield return new WaitForSeconds(0.4f); // Sync avec l'animation
 
-        // Délai synchronisé avec l'animation
-        yield return new WaitForSeconds(0.4f);
-
-        // Vérification finale avant application des dégâts
-        if (Physics.CheckSphere(transform.position + transform.forward, attackRange, playerLayer))
+        if (player && Vector3.Distance(transform.position, player.position) <= data.attackRange * 1.2f)
         {
-            PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(data.damage);
-                Debug.Log($"Dégâts infligés: {data.damage}");
-            }
+            player.GetComponent<PlayerHealth>()?.TakeDamage(data.damage);
         }
-
-        isAttacking = false;
     }
 
     private void Patrol()
     {
         if (patrolPoints.Length == 0) return;
 
-        if (agent.remainingDistance <= agent.stoppingDistance && !isWaiting)
-        {
-            StartCoroutine(WaitAtPoint());
-        }
+        Transform target = patrolPoints[currentPatrolIndex];
+        Vector3 direction = (target.position - transform.position).normalized;
+        direction.y = 0;
 
-        if (!isWaiting)
+        // Déplacement vers le point de patrouille
+        transform.position += direction * data.moveSpeed * Time.deltaTime;
+        transform.rotation = Quaternion.LookRotation(direction);
+
+        animator.SetBool("IsMoving", true);
+
+        if (Vector3.Distance(transform.position, target.position) <= 0.5f)
         {
-            agent.SetDestination(patrolPoints[currentPatrolIndex].position);
-            animator.SetBool("IsMoving", true);
+            if (!isWaiting)
+            {
+                StartCoroutine(WaitAndMoveToNextPoint());
+            }
         }
     }
 
-    private IEnumerator WaitAtPoint()
+    private IEnumerator WaitAndMoveToNextPoint()
     {
         isWaiting = true;
         animator.SetBool("IsMoving", false);
-        
-        yield return new WaitForSeconds(waitTime);
-        
+
+        yield return new WaitForSeconds(data.patrolWaitTime);
+
         currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
         isWaiting = false;
     }
 
-    private IEnumerator GroundCheckRoutine()
+    private void RespawnEnemy()
     {
-        while (true)
+        transform.position = spawnPosition;
+        isGrounded = true;
+        fallTimer = 0f;
+        currentPatrolIndex = 0;
+
+        if (rb)
         {
-            isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, 
-                                       Vector3.down, 
-                                       groundCheckDistance);
-            
-            if (!isGrounded)
-            {
-                Debug.LogWarning("Enemy is falling! Attempting recovery...");
-                RespawnAtNearestNavMesh();
-            }
-            
-            yield return new WaitForSeconds(0.5f);
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
         }
     }
 
-    private void RespawnAtNearestNavMesh()
+    public void OnDeath()
     {
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(transform.position, out hit, 5f, NavMesh.AllAreas))
+        if (deathEffect != null)
         {
-            agent.Warp(hit.position);
-            Debug.Log("Enemy respawned at: " + hit.position);
+            Instantiate(deathEffect, transform.position, Quaternion.identity);
         }
-        else
-        {
-            Debug.LogError("Failed to find valid NavMesh position!");
-        }
+        Destroy(gameObject);
     }
 
-    // Appelé depuis l'Animation
-    public void OnAttackEvent()
+    // Appelé depuis les animations
+    public void OnAttackHitFrame()
     {
-        // Pour une synchronisation précise avec les frames d'attaque
-        if (Physics.CheckSphere(transform.position + transform.forward * 1.5f, 
-                              attackRange, 
-                              playerLayer))
+        if (player && Vector3.Distance(transform.position, player.position) <= data.attackRange)
         {
             player.GetComponent<PlayerHealth>()?.TakeDamage(data.damage);
         }
@@ -216,22 +202,30 @@ public class EnemyController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // Détection
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
-        
-        // Attaque
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + transform.forward * 1.5f, attackRange);
-        
-        // Patrouille
+        if (data != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, data.attackRange);
+
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, data.detectionRange);
+        }
+
         if (patrolPoints != null)
         {
-            Gizmos.color = Color.blue;
+            Gizmos.color = Color.cyan;
             foreach (Transform point in patrolPoints)
             {
-                Gizmos.DrawSphere(point.position, 0.3f);
+                if (point != null)
+                {
+                    Gizmos.DrawSphere(point.position, 0.25f);
+                }
             }
         }
+    }
+
+    internal void ApplyPlatformEffect(float platformDuration, float platformSizeMultiplier, float speedReduction, Color platformColor)
+    {
+        throw new NotImplementedException();
     }
 }

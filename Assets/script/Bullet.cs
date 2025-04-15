@@ -2,57 +2,56 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [Header("Bullet Settings")]
-    [SerializeField] private float speed = 10f;
-    [SerializeField] private int maxPierceCount = 1;
-    [SerializeField] private float lifetime = 2f;
-    [SerializeField] private int damage = 1;
-    
+    public float speed = 20f;
+    public float lifetime = 3f;
+    private Weapon.BulletType bulletType;
     private Rigidbody2D rb;
-    private int currentPierceCount; // Maintenant utilisé dans OnTriggerEnter2D
+    private int pierceCount = 0;
+    private const int maxPierce = 2;
 
-    private void Awake()
+    void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        currentPierceCount = maxPierceCount;
-        Destroy(gameObject, lifetime);
     }
 
-    public void Fire(Vector2 direction)
+    public void SetType(Weapon.BulletType type)
     {
-        rb.linearVelocity = direction.normalized * speed;
+        bulletType = type;
+        rb.linearVelocity = transform.right * speed;
+        Invoke("DisableBullet", lifetime);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy"))
+        EnemyController enemy = collision.GetComponent<EnemyController>();
+        if (enemy != null)
         {
-            // Dégâts à l'ennemi
-            EnemyHealth enemyHealth = collision.GetComponent<EnemyHealth>();
-            if (enemyHealth != null)
+            switch (bulletType)
             {
-                enemyHealth.TakeDamage(damage);
-            }
+                case Weapon.BulletType.Normal:
+                    enemy.OnDeath();
+                    DisableBullet();
+                    break;
 
-            // Système de perçage
-            currentPierceCount--;
-            if (currentPierceCount <= 0)
-            {
-                Destroy(gameObject);
+                case Weapon.BulletType.Platform:
+                    enemy.GetComponent<Rigidbody2D>().linearVelocity *= 0.3f;
+                    enemy.transform.localScale *= 1.5f;
+                    DisableBullet();
+                    break;
+
+                case Weapon.BulletType.Piercing:
+                    enemy.OnDeath();
+                    pierceCount++;
+                    if (pierceCount >= maxPierce) DisableBullet();
+                    break;
             }
-        }
-        else if (collision.CompareTag("Obstacle"))
-        {
-            Destroy(gameObject);
         }
     }
 
-    // Optionnel : Pour les collisions avec des objets sans trigger
-    private void OnCollisionEnter2D(Collision2D collision)
+    public void DisableBullet()
     {
-        if (!collision.collider.isTrigger)
-        {
-            Destroy(gameObject);
-        }
+        CancelInvoke();
+        Weapon weapon = FindObjectOfType<Weapon>();
+        if (weapon != null) weapon.ReturnBulletToPool(gameObject, bulletType);
     }
 }
