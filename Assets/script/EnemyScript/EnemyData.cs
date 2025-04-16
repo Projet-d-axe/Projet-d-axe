@@ -27,6 +27,9 @@ public class EnemyData : ScriptableObject
     public float detectionRange = 10f;
     public float forgetRange = 15f;
     public bool canForget;
+    public float edgeDetection;
+    public float wallDetection;
+    public bool canFallOffLedges;
 
     [Header("Movement Stats")]
     //stats

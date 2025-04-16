@@ -1263,6 +1263,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyDataBaseInspector: {fileID: 0}
+--- !u!1 &505861661
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 505861662}
+  m_Layer: 9
+  m_Name: edgeDetector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &505861662
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505861661}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.57, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 973422613}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &687157355
 GameObject:
   m_ObjectHideFlags: 0
@@ -1738,9 +1769,8 @@ GameObject:
   - component: {fileID: 973422611}
   - component: {fileID: 973422610}
   - component: {fileID: 973422616}
-  - component: {fileID: 973422615}
   - component: {fileID: 973422618}
-  - component: {fileID: 973422617}
+  - component: {fileID: 973422619}
   m_Layer: 9
   m_Name: Enemy
   m_TagString: Enemy
@@ -1786,7 +1816,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 0.9813333, y: 0.9813333}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -1820,7 +1850,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!212 &973422612
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1865,7 +1895,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: -2577853623952902070, guid: 49d2192ee60ff364aa3803f67a062cc5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1888,31 +1918,10 @@ Transform:
   m_LocalPosition: {x: 4.62, y: -2.84, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 505861662}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &973422615
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 973422609}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de905ce7aafe977498b32958c0c51f85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 10
-  invulnerabilityDuration: 0.5
-  deathEffect: {fileID: 0}
-  deathSound: {fileID: 0}
-  onDeath:
-    m_PersistentCalls:
-      m_Calls: []
-  onHealthChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!111 &973422616
 Animation:
   m_ObjectHideFlags: 0
@@ -1929,42 +1938,6 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
---- !u!114 &973422617
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 973422609}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01455874f8fd90e47830f0f864b1281f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 3.5
-  data:
-    enemyName: test
-    pv: 100
-    damage: 10
-    speed: 3.5
-    prefab: {fileID: 0}
-    type: 0
-    detectionRange: 10
-  player: {fileID: 2122821545}
-  animator: {fileID: 0}
-  deathEffect: {fileID: 0}
-  detectionRange: 15
-  forgetRange: 20
-  attackRange: 2
-  attackCooldown: 1
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  patrolPoints:
-  - {fileID: 1578870819}
-  - {fileID: 453250472}
-  waitTime: 2
-  groundCheckDistance: 0.2
 --- !u!195 &973422618
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1987,6 +1960,24 @@ NavMeshAgent:
   m_BaseOffset: 0.2
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &973422619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973422609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c3d2dd9aa69ab84fab5e7f75a97b309, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyData: {fileID: 11400000, guid: e348a539b0871644095758b976f3e41a, type: 2}
+  rb: {fileID: 973422611}
+  edgeDetect: {fileID: 505861662}
+  ground:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &1025182173
 MonoBehaviour:
   m_ObjectHideFlags: 0
