@@ -6,23 +6,19 @@ using System.Collections;
 [RequireComponent(typeof(Collider))]
 public class EnemyController : MonoBehaviour
 {
-    public float moveSpeed = 3.5f;
     [Header("Références")]
     [SerializeField] private EnemyData data;
+
+
     [SerializeField] private Transform player;
     [SerializeField] private Animator animator;
-    [SerializeField] private GameObject deathEffect;
+    private GameObject deathEffect;
     private NavMeshAgent agent;
     private Collider enemyCollider;
 
-    [Header("Paramètres de Détection")]
-    [SerializeField] private float detectionRange = 15f;
-    [SerializeField] private float forgetRange = 20f;
     private bool playerDetected;
 
     [Header("Combat")]
-    [SerializeField] private float attackRange = 2f;
-    [SerializeField] private float attackCooldown = 1.5f;
     [SerializeField] private LayerMask playerLayer;
     private float lastAttackTime;
     private bool isAttacking;
@@ -48,12 +44,6 @@ public class EnemyController : MonoBehaviour
         agent.height = 1.8f;
         agent.baseOffset = 0.1f;
         agent.stoppingDistance = 1f;
-
-        if (data != null)
-        {
-            agent.speed = data.speed;
-            attackRange = data.attackRange;
-        }
     }
 
     private void Start()
@@ -69,12 +59,12 @@ public class EnemyController : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         
         // Système de mémoire du joueur
-        if (distanceToPlayer <= detectionRange)
+        if (distanceToPlayer <= data.detectionRange)
         {
             playerDetected = true;
             lastKnownPlayerPosition = player.position;
         }
-        else if (distanceToPlayer > forgetRange)
+        else if (distanceToPlayer > data.forgetRange)
         {
             playerDetected = false;
         }
@@ -98,7 +88,7 @@ public class EnemyController : MonoBehaviour
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 8f);
 
-        if (distance <= attackRange)
+        if (distance <= data.attackRange)
         {
             agent.isStopped = true;
             TryAttack();
@@ -114,7 +104,7 @@ public class EnemyController : MonoBehaviour
 
     private void TryAttack()
     {
-        if (Time.time >= lastAttackTime + attackCooldown && !isAttacking)
+        if (Time.time >= lastAttackTime + data.attackCooldown && !isAttacking)
         {
             StartCoroutine(AttackRoutine());
             lastAttackTime = Time.time;
@@ -130,7 +120,7 @@ public class EnemyController : MonoBehaviour
         yield return new WaitForSeconds(0.4f);
 
         // Vérification finale avant application des dégâts
-        if (Physics.CheckSphere(transform.position + transform.forward, attackRange, playerLayer))
+        if (Physics.CheckSphere(transform.position + transform.forward, data.attackRange, playerLayer))
         {
             PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
             if (playerHealth != null)
@@ -207,7 +197,7 @@ public class EnemyController : MonoBehaviour
     {
         // Pour une synchronisation précise avec les frames d'attaque
         if (Physics.CheckSphere(transform.position + transform.forward * 1.5f, 
-                              attackRange, 
+                              data.attackRange, 
                               playerLayer))
         {
             player.GetComponent<PlayerHealth>()?.TakeDamage(data.damage);
@@ -218,11 +208,11 @@ public class EnemyController : MonoBehaviour
     {
         // Détection
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Gizmos.DrawWireSphere(transform.position, data.detectionRange);
         
         // Attaque
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + transform.forward * 1.5f, attackRange);
+        Gizmos.DrawWireSphere(transform.position + transform.forward * 1.5f, data.attackRange);
         
         // Patrouille
         if (patrolPoints != null)

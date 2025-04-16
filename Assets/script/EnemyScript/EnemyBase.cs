@@ -8,48 +8,15 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] private EnemyData eD;
     [SerializeField] private Transform player;
     [SerializeField] private Animator animator;
-    private GameObject deathObject;
-    private AudioClip deathSFX;
+    [SerializeField] private EnemyData enemyData;
     private NavMeshAgent agent;
     private Collider enemyCollider;
 
-    [Header("Health")]
-    private int health;
-
-    [Header("Fight")]
-    private int damage;
-    private float attackCD;
-    private bool canAttack;
-    private float attackRange;
-    private float attackSpeed;
-
-    [Header("Detection")]
-    private float detectionRange;
-    private float forgetRange;
-    private bool canForget;
-
-    [Header("Movement")]
-    private float speed;
-
-    [Header("Others")]
-    private EnemyType enemyType;
-    private MovementType movementType;
+    
 
     private void Awake()
     {
-        deathObject = eD.deathObject;
-        deathSFX = eD.deathSfx;
-        health = eD.pv;
-        damage = eD.damage;
-        attackCD = eD.attackCooldown;
-        attackRange = eD.attackRange;
-        attackSpeed = eD.attackSpeed;
-        detectionRange = eD.detectionRange;
-        forgetRange = eD.forgetRange;
-        canForget = eD.canForget;
-        speed = eD.speed;
-        enemyType = eD.eType;
-        movementType = eD.mType;
+        
 
         player = GameObject.FindGameObjectWithTag("Player").transform;
     }
