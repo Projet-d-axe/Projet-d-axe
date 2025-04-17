@@ -1,14 +1,29 @@
+// EnemyData.cs
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewEnemyData", menuName = "Enemy/Enemy Data")]
-public class EnemyData : ScriptableObject
+[System.Serializable]
+public struct EnemyData
 {
-    public float moveSpeed = 3.5f;
-    public float attackRange = 2f;
-    public float attackCooldown = 1.5f;
-    public float detectionRange = 15f;
-    public float groundCheckDistance = 0.2f;
-    public float patrolWaitTime = 2f;
-    public int damage = 10;
-    [HideInInspector] public float lastAttackTime;
+    public float maxHealth;
+    public float movementSpeed;
+    public bool isFrozen;
+    public bool canBePlatform;
+}
+
+// WeaponStats.cs
+[System.Serializable]
+public struct WeaponStats
+{
+    public float damage;
+    public float fireRate;
+    public float projectileSpeed;
+    public float freezeDuration;
+    public int pierceCount;
+    public float platformDuration;
+    internal float reloadTime;
+    internal object maxAmmo;
+    internal float ProjectileSpeed;
+    internal Color Color;
+
+    public int Damage { get; internal set; }
 }
