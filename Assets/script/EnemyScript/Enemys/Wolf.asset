@@ -24,9 +24,6 @@ MonoBehaviour:
   detectionRange: 10
   forgetRange: 15
   canForget: 0
-  edgeDetection: 1.5
-  wallDetection: 0.1
-  canFallOffLedges: 0
   speed: 3.5
   prefab: {fileID: 0}
   deathObject: {fileID: 0}
