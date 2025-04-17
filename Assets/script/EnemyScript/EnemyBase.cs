@@ -6,48 +6,94 @@ using Microsoft.Win32.SafeHandles;
 public class EnemyBase : MonoBehaviour
 {
     [Header("Références")]
-    [SerializeField] private EnemyData enemyData;
-    [SerializeField] private Rigidbody2D rb;
-    [SerializeField] private Transform edgeDetect;
-    [SerializeField] private LayerMask ground;
-    [SerializeField] private LayerMask wall;
+    public EnemyData enemyData;
+    public Rigidbody2D rb;
+    public Transform edgeDetect;
+    public LayerMask ground;
+    public LayerMask wall;
+    public LayerMask playerLayer;
+
+    public EnemyBaseState currentState;
+    public PatrolState patrolState;
+    public PlayerDetectedState playerDetectedState;
+    public AttackState attackState;
+
+
 
     private NavMeshAgent agent;
     private Collider enemyCollider;
 
-    private float orientX = 1f;
+    public float orientX = 1f;
+    public float stateTime;
+
+
 
     private void Awake()
     {
+        patrolState = new PatrolState(this, "patrol");
+        playerDetectedState = new PlayerDetectedState(this, "playerDetected");
+        attackState = new AttackState(this, "attacking");
+        currentState = patrolState;
+        currentState.Enter();
+    }
 
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Update()
     {
-        RaycastHit2D hit = Physics2D.Raycast(edgeDetect.position, Vector2.down, enemyData.edgeDetection, ground);
-        RaycastHit2D wallRightHit = Physics2D.Raycast(edgeDetect.position, Vector2.right, enemyData.wallDetection, wall);
-        RaycastHit2D wallLeftHit = Physics2D.Raycast(edgeDetect.position, Vector2.left, enemyData.wallDetection, wall);
-
-        if (hit.collider == null || wallRightHit.collider == true || wallLeftHit == true)
-        {
-            Debug.Log("Ground Not Found");
-            TurnAround();
-        }
+        currentState.LogicUpdate();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        rb.linearVelocity = new Vector2(enemyData.speed * orientX, rb.linearVelocity.y);
+
+        currentState.PhysicsUpdate();
     }
 
-
-    void TurnAround()
+    public bool CheckForObstacles()
     {
-        transform.Rotate(0, 180, 0);
-        Debug.Log("Turning Around");
-        orientX = orientX * -1;
+        RaycastHit2D hit = Physics2D.Raycast(edgeDetect.position, Vector2.down, enemyData.edgeDetection, ground);
+        RaycastHit2D wallHit = Physics2D.Raycast(edgeDetect.position, orientX == 1 ? Vector2.right : Vector2.left, enemyData.wallDetection, wall);
+        if (hit.collider == null || wallHit.collider == true)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
+    public bool CheckForPlayer()
+    {
+        RaycastHit2D hitPlayer = Physics2D.Raycast(edgeDetect.position, orientX == 1 ? Vector2.right : Vector2.left, enemyData.detectionRange, playerLayer);
+
+        if (hitPlayer.collider == true)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    public void SwitchStates(EnemyBaseState newState)
+    {
+        currentState.Exit();
+        currentState = newState;
+        currentState.Enter();
+        stateTime = Time.time;
+        
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawRay(edgeDetect.position, (orientX == 1 ? Vector2.right : Vector2.left) * enemyData.detectionRange);
     }
 }

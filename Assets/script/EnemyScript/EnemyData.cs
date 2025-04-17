@@ -25,6 +25,7 @@ public class EnemyData : ScriptableObject
     [Header("DetectionStats")]
     //detection
     public float detectionRange = 10f;
+    public float playerDetectedWaitTime = 1f;
     public float forgetRange = 15f;
     public bool canForget;
     public float edgeDetection;

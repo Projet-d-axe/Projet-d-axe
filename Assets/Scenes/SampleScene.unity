@@ -1973,11 +1973,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: e348a539b0871644095758b976f3e41a, type: 2}
-  rb: {fileID: 973422611}
+  rb: {fileID: 0}
   edgeDetect: {fileID: 505861662}
   ground:
     serializedVersion: 2
     m_Bits: 64
+  wall:
+    serializedVersion: 2
+    m_Bits: 128
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  orientX: 1
 --- !u!114 &1025182173
 MonoBehaviour:
   m_ObjectHideFlags: 0
