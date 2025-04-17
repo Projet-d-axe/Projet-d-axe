@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using Microsoft.Win32.SafeHandles;
+using System;
 
 public class EnemyBase : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class EnemyBase : MonoBehaviour
     public LayerMask ground;
     public LayerMask wall;
     public LayerMask playerLayer;
+    public LayerMask damageableLayer;
+    private GameObject player;
 
     public EnemyBaseState currentState;
     public PatrolState patrolState;
@@ -25,7 +28,7 @@ public class EnemyBase : MonoBehaviour
 
     public float orientX = 1f;
     public float stateTime;
-
+    public bool canAttack = true;
 
 
     private void Awake()
@@ -39,6 +42,7 @@ public class EnemyBase : MonoBehaviour
 
     private void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         rb = GetComponent<Rigidbody2D>();
     }
 
@@ -82,7 +86,7 @@ public class EnemyBase : MonoBehaviour
             return false;
         }
     }
-    
+
     public void SwitchStates(EnemyBaseState newState)
     {
         currentState.Exit();
@@ -92,8 +96,37 @@ public class EnemyBase : MonoBehaviour
         
     }
 
+    public void Shoot()
+    {
+        EnemyProjectile projectile = Instantiate(enemyData.attackObject, transform.position, Quaternion.identity).GetComponent<EnemyProjectile>();
+        projectile.InitializeProjectile(player.transform, enemyData.attackSpeed, enemyData.damage);
+        Debug.Log("Shooting");
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawRay(edgeDetect.position, (orientX == 1 ? Vector2.right : Vector2.left) * enemyData.detectionRange);
+    }
+
+    public void Corroutine1()
+    {
+        StartCoroutine(TurnAfterDelay());
+    }
+    
+    public IEnumerator TurnAfterDelay()
+    {
+        yield return new WaitForSeconds(3f);
+        patrolState.TurnAround();
+    }
+
+    public void Detected()
+    {
+        StartCoroutine(Detect());
+    }
+
+    private IEnumerator Detect()
+    {
+        yield return new WaitForSeconds(enemyData.playerDetectedWaitTime);
+        canAttack = true;
     }
 }

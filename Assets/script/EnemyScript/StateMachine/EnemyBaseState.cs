@@ -18,7 +18,7 @@ public class EnemyBaseState
 
     public virtual void Exit()
     {
-
+        Debug.Log("Left" + animationName);
     }
 
     public virtual void LogicUpdate()

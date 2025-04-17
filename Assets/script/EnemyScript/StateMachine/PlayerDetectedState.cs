@@ -23,16 +23,20 @@ public class PlayerDetectedState : EnemyBaseState
     {
         base.LogicUpdate();
 
-        if(!enemy.CheckForPlayer())
-            enemy.SwitchStates(enemy.patrolState);
-        else
-        {
-            if (Time.time >= enemy.stateTime + enemy.enemyData.playerDetectedWaitTime)
-            {
 
-                enemy.SwitchStates(enemy.attackState);
+
+        if (Time.time >= enemy.stateTime + enemy.enemyData.playerDetectedWaitTime)
+        {
+            if (enemy.CheckForPlayer())
+            {
+                enemy.SwitchStates(enemy.attackState); // Switch to attack after delay
+            }
+            else
+            {
+                enemy.SwitchStates(enemy.patrolState); // Player lost, go back to patrol
             }
         }
+
     }
 
     public override void PhysicsUpdate()
