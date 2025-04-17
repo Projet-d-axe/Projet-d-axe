@@ -4,7 +4,7 @@ using System.Collections;
 using Microsoft.Win32.SafeHandles;
 using System;
 
-public class EnemyBase : MonoBehaviour
+public class EnemyBase : MonoBehaviour, iDamageable
 {
     [Header("Références")]
     public EnemyData enemyData;
@@ -128,5 +128,16 @@ public class EnemyBase : MonoBehaviour
     {
         yield return new WaitForSeconds(enemyData.playerDetectedWaitTime);
         canAttack = true;
+    }
+
+    public void Damage(int damageAmount)
+    {
+        enemyData.pv -= damageAmount;
+        Debug.Log(enemyData.pv);
+
+        if (enemyData.pv <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 }
