@@ -15,7 +15,7 @@ public class EnemyHealth : MonoBehaviour
         currentHealth -= amount;
         if (currentHealth <= 0)
         {
-            Die();
+            Die();  
         }
     }
 

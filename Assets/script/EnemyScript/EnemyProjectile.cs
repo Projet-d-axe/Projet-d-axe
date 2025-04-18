@@ -15,6 +15,9 @@ public class EnemyProjectile : MonoBehaviour
     private Vector3 trajectoryRange;
     private float direction;
 
+    public GameObject area;
+
+
     private iDamageable targetDamageable;
 
     private void Start()
@@ -28,18 +31,10 @@ public class EnemyProjectile : MonoBehaviour
     {
         UpdateProjectilePosition();
 
-        if (Vector3.Distance(transform.position, trajectoryEndPoint) < 1f)
+        if (Vector3.Distance(transform.position, trajectoryEndPoint) < 2f)
         {
-            if (targetDamageable != null)
-            {
-                float distanceToTarget = Vector3.Distance(transform.position, ((MonoBehaviour)targetDamageable).transform.position);
-
-                if (distanceToTarget < 1f) // Adjust radius if needed
-                {
-                    targetDamageable.Damage(damage);
-                }
-            }
-
+            EnemyAttackZone damageArea = Instantiate(area, transform.position, Quaternion.identity).GetComponent<EnemyAttackZone>();
+            damageArea.damage = damage;
             Destroy(gameObject);
         }
     }
@@ -66,5 +61,6 @@ public class EnemyProjectile : MonoBehaviour
         trajectoryStartPoint = transform.position;
         trajectoryEndPoint = target.position;
         targetDamageable = target.GetComponent<iDamageable>();
+        Debug.Log(targetDamageable);
     }
 }
