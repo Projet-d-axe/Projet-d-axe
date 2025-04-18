@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6577b085a78ae6f46ad0cd8fb1a65705, type: 3}
-  m_Name: Wolf
+  m_Name: Dragon
   m_EditorClassIdentifier: 
-  enemyName: 
-  eType: 0
-  mType: 1
+  enemyName: Dragon
+  eType: 1
+  mType: 0
   pv: 100
-  iFrameDuration: 0.5
-  damage: 20
-  attackCooldown: 1
-  attackRange: 0.2
-  attackSpeed: 10
+  iFrameDuration: 0
+  damage: 10
+  attackCooldown: 0
+  attackRange: 2
+  attackSpeed: 1
   knockbackAngle: {x: 2, y: 1}
-  knockbackForce: 5
-  detectionRange: 5
+  knockbackForce: 2
+  detectionRange: 10
   playerDetectedWaitTime: 1
-  forgetRange: 7
+  forgetRange: 15
   canForget: 0
-  edgeDetection: 1.5
-  wallDetection: 0.1
-  canFallOffLedges: 1
+  edgeDetection: 0
+  wallDetection: 0
+  canFallOffLedges: 0
   speed: 3.5
-  prefab: {fileID: 924923634800887736, guid: a09f5ef907c575247b8130e22412e0c6, type: 3}
+  prefab: {fileID: 0}
   deathObject: {fileID: 0}
   deathSfx: {fileID: 0}
-  attackObject: {fileID: 4640801137598475924, guid: 27b398b6f746e584c908b00e2b7b4331, type: 3}
+  attackObject: {fileID: 0}

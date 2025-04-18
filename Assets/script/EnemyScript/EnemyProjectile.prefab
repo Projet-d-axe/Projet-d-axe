@@ -132,7 +132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd57e1edc8cdaf045b151c88ac5a657b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trajectoryMaxHigh: 0.3
+  trajectoryMaxHigh: 0.33
   trajectory:
     serializedVersion: 2
     m_Curve:
