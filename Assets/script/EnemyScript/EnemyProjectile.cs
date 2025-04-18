@@ -15,6 +15,8 @@ public class EnemyProjectile : MonoBehaviour
     private Vector3 trajectoryRange;
     private float direction;
 
+    private Transform player;
+
     public GameObject area;
 
 
@@ -25,13 +27,15 @@ public class EnemyProjectile : MonoBehaviour
         trajectoryRange = trajectoryEndPoint - trajectoryStartPoint;
         direction = Mathf.Sign(trajectoryRange.x);
         trajectoryRelativeMaxHigh = Mathf.Abs(trajectoryRange.x) * trajectoryMaxHigh;
+
+        player = GameObject.FindWithTag("Player").transform;
     }
 
     private void Update()
     {
         UpdateProjectilePosition();
 
-        if (Vector3.Distance(transform.position, trajectoryEndPoint) < 2f)
+        if (Vector3.Distance(transform.position, trajectoryEndPoint) < 0.2f)
         {
             EnemyAttackZone damageArea = Instantiate(area, transform.position, Quaternion.identity).GetComponent<EnemyAttackZone>();
             damageArea.damage = damage;

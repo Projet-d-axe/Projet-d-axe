@@ -29,7 +29,7 @@ public class EnemyAttackZone : MonoBehaviour
 
         if (!hasDealtDamaged )
         {
-            Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 1f, player);
+            Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 0.2f, player);
 
             foreach (Collider2D hitCollider in hitColliders)
             {

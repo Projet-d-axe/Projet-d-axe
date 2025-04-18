@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7746895014533590939}
   - component: {fileID: 3322275380737983463}
   - component: {fileID: 3669317681682497804}
-  - component: {fileID: 7993247289996982478}
+  - component: {fileID: 3959082090380633}
   - component: {fileID: 4100244406643125793}
   - component: {fileID: 6129409167810499213}
   m_Layer: 9
@@ -30,9 +30,9 @@ Transform:
   m_GameObject: {fileID: 924923634800887736}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.62, y: -2.84, z: 90}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 4.62, y: -2.28, z: 90}
+  m_LocalScale: {x: 0.32, y: 0.32, z: 0.32}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4116786740370957417}
   m_Father: {fileID: 0}
@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -6216554350735423002, guid: aa0417cc9a08ec94abd7296b60d646a6, type: 3}
+  m_Sprite: {fileID: -6216554350735423002, guid: 24aec1cddbee5e743973110ee64dd577, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -119,8 +119,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
---- !u!61 &7993247289996982478
-BoxCollider2D:
+--- !u!70 &3959082090380633
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -153,18 +153,9 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.3933334, y: 1.5533333}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Offset: {x: 0.26000014, y: -0.30231234}
+  m_Size: {x: 7.1800036, y: 3.7919261}
+  m_Direction: 1
 --- !u!111 &4100244406643125793
 Animation:
   m_ObjectHideFlags: 0

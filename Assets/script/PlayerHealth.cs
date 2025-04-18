@@ -52,7 +52,7 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     public void TakeDamage(int damage)
     {
         if (isDead || IsInvincible) return;
-
+        Debug.Log(currentHealth);
         currentHealth = Mathf.Max(0, currentHealth - damage);
         lastDamageTime = Time.time;
 
@@ -94,6 +94,7 @@ public class PlayerHealth : MonoBehaviour, iDamageable
         // Effets
         if (deathEffectPrefab) Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
         if (deathSound) audioSource.PlayOneShot(deathSound);
+        Debug.Log("Ded");
     }
 
     // Méthodes d'effets visuels
