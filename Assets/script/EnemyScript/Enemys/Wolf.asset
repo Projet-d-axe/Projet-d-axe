@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Wolf
   m_EditorClassIdentifier: 
   enemyName: 
-  eType: 1
+  eType: 0
   mType: 1
   pv: 100
   iFrameDuration: 0.5
