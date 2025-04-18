@@ -1,28 +1,48 @@
 using UnityEngine;
 
-public class ProjectileScript : MonoBehaviour
+public class Bullet : MonoBehaviour
 {
-    private int damage;
-    private Vector2 direction;
+    public int damage = 1;
+    public float lifeTime = 3f;
 
-    public void Initialize(Vector2 dir, int dmg)
+    private float timer;
+    private ObjectPool pool;
+
+    public void SetPool(ObjectPool poolRef)
     {
-        direction = dir;
-        damage = dmg;
-        Destroy(gameObject, 3f); // Auto-destroy after 3 seconds
+        pool = poolRef;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    void OnEnable()
     {
+        timer = lifeTime;
+    }
+
+    void Update()
+    {
+        timer -= Time.deltaTime;
+        if (timer <= 0f)
+            Despawn();
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.isTrigger) return;
+
         if (collision.CompareTag("Enemy"))
         {
-            collision.GetComponent<IDamageable>()?.TakeDamage(damage); // Ensure the object implements IDamageable
-            Destroy(gameObject);
+            EnemyHealth enemy = collision.GetComponent<EnemyHealth>();
+            if (enemy) enemy.TakeDamage(damage);
         }
-    }
-}
 
-internal interface IDamageable
-{
-    void TakeDamage(int damage);
+        Despawn();
+    }
+
+    void Despawn()
+    {
+        if (pool != null)
+            pool.ReturnToPool(gameObject);
+        else
+            Destroy(gameObject);
+    }
 }

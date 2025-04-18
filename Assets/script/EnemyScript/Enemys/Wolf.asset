@@ -13,16 +13,19 @@ MonoBehaviour:
   m_Name: Wolf
   m_EditorClassIdentifier: 
   enemyName: 
-  eType: 0
-  mType: 0
+  eType: 1
+  mType: 1
   pv: 100
   iFrameDuration: 0.5
-  damage: 10
-  attackCooldown: 0
+  damage: 20
+  attackCooldown: 1
   attackRange: 2
-  attackSpeed: 1
-  detectionRange: 10
-  forgetRange: 15
+  attackSpeed: 10
+  knockbackAngle: {x: 2, y: 1}
+  knockbackForce: 5
+  detectionRange: 5
+  playerDetectedWaitTime: 1
+  forgetRange: 7
   canForget: 0
   edgeDetection: 1.5
   wallDetection: 0.1
@@ -31,3 +34,4 @@ MonoBehaviour:
   prefab: {fileID: 0}
   deathObject: {fileID: 0}
   deathSfx: {fileID: 0}
+  attackObject: {fileID: 4640801137598475924, guid: 27b398b6f746e584c908b00e2b7b4331, type: 3}

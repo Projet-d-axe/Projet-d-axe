@@ -5,7 +5,7 @@ using UnityEngine.UI;
 /// <summary>
 /// Système complet de santé du joueur avec gestion UI/effets
 /// </summary>
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : MonoBehaviour, iDamageable
 {
     // Configuration de base
     [Header("Core Settings")]
@@ -128,5 +128,10 @@ public class PlayerHealth : MonoBehaviour
         if (healToFull) currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         UpdateHealthUI();
+    }
+
+    public void Damage(int damageAmount)
+    {
+        TakeDamage(damageAmount);
     }
 }
