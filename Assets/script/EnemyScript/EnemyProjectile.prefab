@@ -190,3 +190,4 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  area: {fileID: 7560417185782379527, guid: 6a54522d2f1a391418d37112fe6fd24c, type: 3}

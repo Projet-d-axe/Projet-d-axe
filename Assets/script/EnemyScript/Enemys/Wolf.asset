@@ -19,7 +19,7 @@ MonoBehaviour:
   iFrameDuration: 0.5
   damage: 20
   attackCooldown: 1
-  attackRange: 2
+  attackRange: 1
   attackSpeed: 10
   knockbackAngle: {x: 2, y: 1}
   knockbackForce: 5
