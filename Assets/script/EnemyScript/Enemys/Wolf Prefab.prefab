@@ -192,13 +192,13 @@ MonoBehaviour:
     m_Bits: 64
   wall:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 4224
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
   damageableLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 4352
   orientX: 1
   stateTime: 0
   canAttack: 1
