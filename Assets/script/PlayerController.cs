@@ -55,6 +55,7 @@ public class PlayerController : MonoBehaviour
     public float rollSpeed = 12f;
     public float rollDuration = 0.2f;
     public float rollCooldown = 0.5f;
+    public float LongJumpSpeed;
     private bool isRolling = false;
     private float nextRollTime;
 
@@ -106,10 +107,10 @@ public class PlayerController : MonoBehaviour
         {
             CheckGrounded();
             HandleMovement();
-            HandleJump();
             HandleCrouch();
             HandleFastFall();
             HandleAiming();
+            HandleJump();
         }
 
         HandleRoll();
@@ -252,7 +253,9 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator PerformRoll(float direction)
     {
+        bool rollJump = false;
         isRolling = true;
+        Debug.Log("Start Roll");
         nextRollTime = Time.time + rollCooldown;
 
         float startTime = Time.time;
@@ -261,11 +264,24 @@ public class PlayerController : MonoBehaviour
 
         while (Time.time < startTime + rollTime)
         {
-            rb.linearVelocity = new Vector2(speed * direction, rb.linearVelocity.y);
+            if (!rollJump)
+            {
+                rb.linearVelocity = new Vector2(speed * direction, rb.linearVelocity.y);
+                yield return null;
+            }
+            
+
+            if (Input.GetButtonDown("Jump") || rollJump)
+            {
+                rb.linearVelocity = new Vector2(LongJumpSpeed * direction, jumpForce);
+                rollJump = true;
+                Debug.Log("Long Jump !");
+            }
             yield return null;
         }
 
         isRolling = false;
+        Debug.Log("Stop Roll");
     }
 
     private void HandleAiming()

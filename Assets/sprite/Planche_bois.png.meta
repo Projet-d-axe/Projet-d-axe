@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Planche_bois_0: -2563502488346130930
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
