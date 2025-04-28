@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [Header("Player Settings")]
     public float maxHealth = 100f;
     private float currentHealth;
+    public XPSystem xpSystem;
 
     // === LAYERS ===
     public LayerMask groundLayerMask;
@@ -295,8 +296,13 @@ public class PlayerController : MonoBehaviour
 
         // Changement d'arme
         if (Input.GetKeyDown(KeyCode.Alpha1)) EquipWeapon(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
+        if (xpSystem != null)
+        {
+            if (xpSystem.currentXP >= 3 && Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
+            if (xpSystem.currentXP >= 6 && Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
+            Debug.Log("Weapon 2 unlocked: " + (xpSystem.currentXP >= 3));
+            Debug.Log("Weapon 3 unlocked: " + (xpSystem.currentXP >= 6));
+        }
     }
 
     private void EquipWeapon(int index)
