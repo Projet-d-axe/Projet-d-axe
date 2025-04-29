@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CapsuleCollider2D))]
@@ -84,6 +85,8 @@ public class PlayerController : MonoBehaviour
     private WeaponSystem currentWeapon;
     private int currentWeaponIndex = 0;
     private bool isAiming;
+
+    private change_scenes change_scenes;
 
     void Awake()
     {

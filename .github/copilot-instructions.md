@@ -8,7 +8,7 @@
   - Layers:
     - Default, TransparentFX, Ignore Raycast, Water, UI, Ground, wall, Player, Aimable, Platform, Enemy, Obstacle
 - Active game object:
-  - Name: gamemanager
-  - Tag: Untagged
-  - Layer: Default
+  - Name: Enemy
+  - Tag: Enemy
+  - Layer: Aimable
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->

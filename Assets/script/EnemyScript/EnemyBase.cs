@@ -142,4 +142,20 @@ public class EnemyBase : MonoBehaviour, iDamageable
             xpSystem.GainXP(enemyData.xpReward);
         }
     }
+    private void CheckVictoryCondition()
+        {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        if (enemies.Length == 0)
+        {
+            change_scenes sceneChanger = FindObjectOfType<change_scenes>();
+            if (sceneChanger != null)
+            {
+                sceneChanger.ChangeScene();
+            }
+            else
+            {
+                Debug.LogWarning("No change_scenes script found in the scene.");
+            }
+        }
+    }
 }
