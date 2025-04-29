@@ -298,10 +298,8 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1)) EquipWeapon(0);
         if (xpSystem != null)
         {
-            if (xpSystem.currentXP >= 3 && Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
-            if (xpSystem.currentXP >= 6 && Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
-            Debug.Log("Weapon 2 unlocked: " + (xpSystem.currentXP >= 3));
-            Debug.Log("Weapon 3 unlocked: " + (xpSystem.currentXP >= 6));
+            if (xpSystem.currentLevel >= 3 && Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
+            if (xpSystem.currentLevel >= 6 && Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
         }
     }
 

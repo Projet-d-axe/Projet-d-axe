@@ -101,7 +101,6 @@ public class XPSystem : MonoBehaviour
         if (levelUpSound != null)
             audioSource.PlayOneShot(levelUpSound);
 
-        Debug.Log("Level Up! Now level " + currentLevel);
     }
 
 
@@ -118,7 +117,6 @@ public class XPSystem : MonoBehaviour
         if (levelText != null)
         {
             levelText.text = "Niveau : " + currentLevel;
-            Debug.Log("Niveau : " + currentLevel);
         }
         
     }

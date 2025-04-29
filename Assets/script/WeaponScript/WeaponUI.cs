@@ -4,7 +4,7 @@ using TMPro;
 
 public class WeaponUI : MonoBehaviour
 {
-    public TextMeshProUGUI ammoText;
+
     public TextMeshProUGUI weaponNameText;
     public Image ammoIcon;
     public Sprite[] weaponIcons;
@@ -31,9 +31,6 @@ public class WeaponUI : MonoBehaviour
         if (currentWeapon != null)
         {
             int reserve = currentWeapon.GetReserveAmmo();
-            ammoText.text = currentWeapon.infiniteAmmo
-                ? $"Ammo: ∞"
-                : $"Ammo: {currentWeapon.GetCurrentAmmo()} / {reserve}";
         }
     }
 }
