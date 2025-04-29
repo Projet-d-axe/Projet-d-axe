@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlatformProjectile : MonoBehaviour
 {
     public GameObject platformPrefab;
-    public float lifeTime = 5f;
+    public float lifeTime = 15f;
 
     private float timer;
     private ObjectPool pool;

@@ -6,7 +6,7 @@ using System;
 
 public class EnemyBase : MonoBehaviour, iDamageable
 {
-    [Header("Références")]
+    [Header("Rï¿½fï¿½rences")]
     public EnemyData enemyData;
     public Rigidbody2D rb;
     public Transform edgeDetect;
@@ -29,6 +29,7 @@ public class EnemyBase : MonoBehaviour, iDamageable
     public float orientX = 1f;
     public float stateTime;
     public bool canAttack = true;
+    public XPSystem xpSystem;
 
 
     private void Awake()
@@ -138,6 +139,7 @@ public class EnemyBase : MonoBehaviour, iDamageable
         if (enemyData.pv <= 0)
         {
             Destroy(gameObject);
+            xpSystem.GainXP(enemyData.xpReward);
         }
     }
 }

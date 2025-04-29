@@ -45,6 +45,7 @@ public class EnemyData : ScriptableObject
     public GameObject deathObject;
     public AudioClip deathSfx;
     public GameObject attackObject;
+    public int xpReward = 50;
 }
 
 public enum EnemyType

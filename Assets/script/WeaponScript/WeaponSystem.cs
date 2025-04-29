@@ -3,7 +3,6 @@ using System.Collections;
 
 public class WeaponSystem : MonoBehaviour
 {
-
     [Header("UI")]
     public string weaponName = "Weapon";
     
@@ -14,7 +13,7 @@ public class WeaponSystem : MonoBehaviour
     public int reserveAmmo = 30;
     public float reloadTime = 1f;
     public bool autoReload = true;
-    public bool infiniteAmmo = false; // <-- Ajouté
+    public bool infiniteAmmo = false;
     public bool lockMovementWhenAiming { get; set; }
     public float aimingMoveSpeedMultiplier = 0.5f;
 
@@ -23,6 +22,7 @@ public class WeaponSystem : MonoBehaviour
     public ObjectPool projectilePool;
     public float projectileSpeed = 10f;
     public int damage = 1;
+    public ObjectPool pool { get; set; }
 
     [Header("Effects")]
     public ParticleSystem muzzleFlash;
@@ -82,20 +82,33 @@ public class WeaponSystem : MonoBehaviour
     {
         GameObject projectile = null;
 
-        if (projectilePool)
+        if (projectilePool != null)
         {
             projectile = projectilePool.Get(firePoint.position, firePoint.rotation);
         }
-        else if (projectilePrefab)
+        else if (projectilePrefab != null)
         {
             projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         }
 
         if (projectile == null) return;
 
+        // Configure projectile physics
         Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-        if (rb) rb.linearVelocity = GetShootDirection() * projectileSpeed;
+        if (rb != null) 
+        {
+            rb.linearVelocity = GetShootDirection() * projectileSpeed;
+        }
 
+        // Configure projectile damage
+        var damageDealer = projectile.GetComponent<ProjectileDamage>();
+        if (damageDealer == null)
+        {
+            damageDealer = projectile.AddComponent<ProjectileDamage>();
+        }
+        damageDealer.damageAmount = damage;
+
+        // Handle pooling if available
         projectile.GetComponent<Bullet>()?.SetPool(projectilePool);
         projectile.GetComponent<PlatformProjectile>()?.SetPool(projectilePool);
 
@@ -112,13 +125,16 @@ public class WeaponSystem : MonoBehaviour
     {
         Collider2D projCol = projectile.GetComponent<Collider2D>();
         Collider2D playerCol = GetComponentInParent<Collider2D>();
-        if (projCol && playerCol) Physics2D.IgnoreCollision(projCol, playerCol);
+        if (projCol != null && playerCol != null) 
+        {
+            Physics2D.IgnoreCollision(projCol, playerCol);
+        }
     }
 
     protected void PlayShootEffects()
     {
-        if (muzzleFlash) muzzleFlash.Play();
-        if (shootSound) audioSource.PlayOneShot(shootSound);
+        if (muzzleFlash != null) muzzleFlash.Play();
+        if (shootSound != null) audioSource.PlayOneShot(shootSound);
     }
 
     public void Reload()
@@ -130,7 +146,7 @@ public class WeaponSystem : MonoBehaviour
     protected virtual IEnumerator ReloadRoutine()
     {
         isReloading = true;
-        if (reloadSound) audioSource.PlayOneShot(reloadSound);
+        if (reloadSound != null) audioSource.PlayOneShot(reloadSound);
 
         yield return new WaitForSeconds(reloadTime);
 
@@ -146,4 +162,45 @@ public class WeaponSystem : MonoBehaviour
     public int GetCurrentAmmo() => infiniteAmmo ? 999 : currentAmmo;
     public int GetReserveAmmo() => infiniteAmmo ? -1 : reserveAmmo;
     public bool IsReloading() => isReloading;
+    }
+
+    // ProjectileDamage class to handle damage application
+    public class ProjectileDamage : MonoBehaviour
+    {
+    public static ObjectPool pool;
+    public int damageAmount = 1;
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        ApplyDamage(collision.gameObject);
+        HandleProjectileDestruction();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        ApplyDamage(collider.gameObject);
+        HandleProjectileDestruction();
+    }
+
+    private void ApplyDamage(GameObject target)
+    {
+        var damageable = target.GetComponent<iDamageable>();
+        if (damageable != null)
+        {
+            damageable.Damage(damageAmount);
+        }
+    }
+
+    private void HandleProjectileDestruction()
+    {
+        var bullet = GetComponent<Bullet>();
+        if (bullet != null && pool != null)
+        {
+            pool.ReturnToPool(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 }

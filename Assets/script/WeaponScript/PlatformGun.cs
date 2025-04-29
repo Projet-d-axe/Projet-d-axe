@@ -16,7 +16,7 @@ public class PlatformGun : WeaponSystem
     {
         base.Awake();
         infiniteAmmo = true; // Tir illimité
-        autoReload = false;
+        autoReload = true;
         
     }
 
