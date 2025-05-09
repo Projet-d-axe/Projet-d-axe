@@ -6,7 +6,7 @@ using System;
 
 public class EnemyBase : MonoBehaviour, iDamageable
 {
-    [Header("Rï¿½fï¿½rences")]
+    [Header("Références")]
     public EnemyData enemyData;
     public Rigidbody2D rb;
     public Transform edgeDetect;
@@ -29,7 +29,6 @@ public class EnemyBase : MonoBehaviour, iDamageable
     public float orientX = 1f;
     public float stateTime;
     public bool canAttack = true;
-    public XPSystem xpSystem;
 
 
     private void Awake()
@@ -139,23 +138,6 @@ public class EnemyBase : MonoBehaviour, iDamageable
         if (enemyData.pv <= 0)
         {
             Destroy(gameObject);
-            xpSystem.GainXP(enemyData.xpReward);
-        }
-    }
-    private void CheckVictoryCondition()
-        {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        if (enemies.Length == 0)
-        {
-            change_scenes sceneChanger = FindObjectOfType<change_scenes>();
-            if (sceneChanger != null)
-            {
-                sceneChanger.ChangeScene();
-            }
-            else
-            {
-                Debug.LogWarning("No change_scenes script found in the scene.");
-            }
         }
     }
 }

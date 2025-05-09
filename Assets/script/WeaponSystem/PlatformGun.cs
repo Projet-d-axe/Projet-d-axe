@@ -1,6 +1,4 @@
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 public class PlatformGun : WeaponSystem
 {
@@ -8,16 +6,11 @@ public class PlatformGun : WeaponSystem
     public GameObject platformPrefab;
     public float platformDuration = 10f;
 
-
-
-    
-
     protected override void Awake()
     {
         base.Awake();
         infiniteAmmo = true; // Tir illimité
-        autoReload = true;
-        
+        autoReload = false;
     }
 
     protected override void FireProjectile()

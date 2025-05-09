@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(CapsuleCollider2D))]
@@ -13,7 +12,6 @@ public class PlayerController : MonoBehaviour
     [Header("Player Settings")]
     public float maxHealth = 100f;
     private float currentHealth;
-    public XPSystem xpSystem;
 
     // === LAYERS ===
     public LayerMask groundLayerMask;
@@ -57,6 +55,7 @@ public class PlayerController : MonoBehaviour
     public float rollSpeed = 12f;
     public float rollDuration = 0.2f;
     public float rollCooldown = 0.5f;
+    public float LongJumpSpeed;
     private bool isRolling = false;
     private float nextRollTime;
 
@@ -86,8 +85,6 @@ public class PlayerController : MonoBehaviour
     private int currentWeaponIndex = 0;
     private bool isAiming;
 
-    private change_scenes change_scenes;
-
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -110,10 +107,10 @@ public class PlayerController : MonoBehaviour
         {
             CheckGrounded();
             HandleMovement();
-            HandleJump();
             HandleCrouch();
             HandleFastFall();
             HandleAiming();
+            HandleJump();
         }
 
         HandleRoll();
@@ -256,7 +253,9 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator PerformRoll(float direction)
     {
+        bool rollJump = false;
         isRolling = true;
+        Debug.Log("Start Roll");
         nextRollTime = Time.time + rollCooldown;
 
         float startTime = Time.time;
@@ -265,11 +264,24 @@ public class PlayerController : MonoBehaviour
 
         while (Time.time < startTime + rollTime)
         {
-            rb.linearVelocity = new Vector2(speed * direction, rb.linearVelocity.y);
+            if (!rollJump)
+            {
+                rb.linearVelocity = new Vector2(speed * direction, rb.linearVelocity.y);
+                yield return null;
+            }
+            
+
+            if (Input.GetButtonDown("Jump") || rollJump)
+            {
+                rb.linearVelocity = new Vector2(LongJumpSpeed * direction, jumpForce);
+                rollJump = true;
+                Debug.Log("Long Jump !");
+            }
             yield return null;
         }
 
         isRolling = false;
+        Debug.Log("Stop Roll");
     }
 
     private void HandleAiming()
@@ -299,11 +311,8 @@ public class PlayerController : MonoBehaviour
 
         // Changement d'arme
         if (Input.GetKeyDown(KeyCode.Alpha1)) EquipWeapon(0);
-        if (xpSystem != null)
-        {
-            if (xpSystem.currentLevel >= 3 && Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
-            if (xpSystem.currentLevel >= 6 && Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
-        }
+        if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
+        if (Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
     }
 
     private void EquipWeapon(int index)

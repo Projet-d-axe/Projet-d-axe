@@ -8,10 +8,6 @@ public class AOEGun : WeaponSystem
     public LayerMask enemyLayer;
     private Rigidbody2D playerRb;
 
-
-
-
-
     protected override void Awake()
     {
         base.Awake();
