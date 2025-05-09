@@ -3,6 +3,11 @@ using System.Collections;
 
 public class WeaponSystem : MonoBehaviour
 {
+    public enum WeaponType { Standard, AOE, Platform }
+    
+    [Header("Weapon Type")]
+    public WeaponType weaponType = WeaponType.Standard;
+
     [Header("UI")]
     public string weaponName = "Weapon";
     
@@ -13,7 +18,7 @@ public class WeaponSystem : MonoBehaviour
     public int reserveAmmo = 30;
     public float reloadTime = 1f;
     public bool autoReload = true;
-    public bool infiniteAmmo = false; // <-- Ajouté
+    public bool infiniteAmmo = false;
     public bool lockMovementWhenAiming { get; set; }
     public float aimingMoveSpeedMultiplier = 0.5f;
 
@@ -22,6 +27,15 @@ public class WeaponSystem : MonoBehaviour
     public ObjectPool projectilePool;
     public float projectileSpeed = 10f;
     public int damage = 1;
+
+    [Header("AOE Settings")]
+    public float aoeRadius = 3f;
+    public float recoilForce = 5f;
+    public LayerMask enemyLayer;
+
+    [Header("Platform Settings")]
+    public GameObject platformPrefab;
+    public float platformDuration = 10f;
 
     [Header("Effects")]
     public ParticleSystem muzzleFlash;
@@ -32,6 +46,7 @@ public class WeaponSystem : MonoBehaviour
     protected float nextFireTime;
     protected bool isReloading;
     protected AudioSource audioSource;
+    protected Rigidbody2D playerRb;
 
     protected virtual void Awake()
     {
@@ -41,6 +56,15 @@ public class WeaponSystem : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.spatialBlend = 1f;
             audioSource.volume = 0.7f;
+        }
+
+        playerRb = GetComponentInParent<Rigidbody2D>();
+
+        // Configuration spécifique au type d'arme
+        if (weaponType == WeaponType.Platform)
+        {
+            infiniteAmmo = true;
+            autoReload = false;
         }
     }
 
@@ -75,6 +99,15 @@ public class WeaponSystem : MonoBehaviour
         nextFireTime = Time.time + fireRate;
         PlayShootEffects();
         FireProjectile();
+
+        // Effets spécifiques au type d'arme
+        switch (weaponType)
+        {
+            case WeaponType.AOE:
+                ApplyAOEEffect();
+                ApplyRecoil();
+                break;
+        }
     }
 
     protected virtual void FireProjectile()
@@ -95,10 +128,55 @@ public class WeaponSystem : MonoBehaviour
         Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
         if (rb) rb.linearVelocity = GetShootDirection() * projectileSpeed;
 
-        projectile.GetComponent<Bullet>()?.SetPool(projectilePool);
-        projectile.GetComponent<PlatformProjectile>()?.SetPool(projectilePool);
+        // Configuration spécifique au projectile
+        if (weaponType == WeaponType.Platform && projectile.TryGetComponent(out PlatformProjectile platformProj))
+        {
+            platformProj.platformPrefab = platformPrefab;
+            platformProj.lifeTime = platformDuration;
+            if (projectilePool != null)
+                platformProj.SetPool(projectilePool);
+        }
+        else if (projectile.TryGetComponent(out Bullet bullet))
+        {
+            bullet.damage = damage;
+            if (projectilePool != null)
+                bullet.SetPool(projectilePool);
+        }
 
         IgnorePlayerCollision(projectile);
+    }
+
+    private void ApplyAOEEffect()
+    {
+        if (weaponType != WeaponType.AOE) return;
+
+        Vector2 origin = firePoint.position;
+        Vector2 shootDirection = GetShootDirection();
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(origin, aoeRadius, enemyLayer);
+
+        foreach (Collider2D hit in hits)
+        {
+            if (hit.CompareTag("Enemy"))
+            {
+                Vector2 toEnemy = (hit.transform.position - firePoint.position).normalized;
+                float angle = Vector2.Angle(shootDirection, toEnemy);
+
+                if (angle <= 60f)
+                {
+                    EnemyHealth enemy = hit.GetComponent<EnemyHealth>();
+                    if (enemy) enemy.TakeDamage(damage);
+                }
+            }
+        }
+    }
+
+    private void ApplyRecoil()
+    {
+        if (weaponType != WeaponType.AOE || playerRb == null || recoilForce <= 0) return;
+
+        Vector2 direction = -GetShootDirection();
+        playerRb.AddForce(direction * recoilForce, ForceMode2D.Impulse);
     }
 
     protected Vector2 GetShootDirection()
@@ -145,4 +223,13 @@ public class WeaponSystem : MonoBehaviour
     public int GetCurrentAmmo() => infiniteAmmo ? 999 : currentAmmo;
     public int GetReserveAmmo() => infiniteAmmo ? -1 : reserveAmmo;
     public bool IsReloading() => isReloading;
+
+    void OnDrawGizmosSelected()
+    {
+        if (firePoint && weaponType == WeaponType.AOE)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(firePoint.position, aoeRadius);
+        }
+    }
 }

@@ -8,7 +8,7 @@
   - Layers:
     - Default, TransparentFX, Ignore Raycast, Water, UI, Ground, wall, Player, Aimable, Platform, Enemy, Obstacle
 - Active game object:
-  - Name: Enemy
-  - Tag: Enemy
-  - Layer: Aimable
+  - Name: Main Camera
+  - Tag: MainCamera
+  - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
