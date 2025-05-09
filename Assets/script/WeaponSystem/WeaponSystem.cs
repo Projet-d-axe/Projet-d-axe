@@ -3,7 +3,7 @@ using System.Collections;
 
 public class WeaponSystem : MonoBehaviour
 {
-    public enum WeaponType { Standard, AOE, Platform }
+    public enum WeaponType { Standard, AOE, Platform, Laser }
     
     [Header("Weapon Type")]
     public WeaponType weaponType = WeaponType.Standard;
@@ -37,6 +37,12 @@ public class WeaponSystem : MonoBehaviour
     public GameObject platformPrefab;
     public float platformDuration = 10f;
 
+    [Header("Laser Settings")]
+    public float laserRange = 20f;
+    public float laserDuration = 0.1f;
+    public LineRenderer laserLine;
+    public LayerMask crystalLayer;
+
     [Header("Effects")]
     public ParticleSystem muzzleFlash;
     public AudioClip shootSound;
@@ -61,10 +67,24 @@ public class WeaponSystem : MonoBehaviour
         playerRb = GetComponentInParent<Rigidbody2D>();
 
         // Configuration spécifique au type d'arme
-        if (weaponType == WeaponType.Platform)
+        switch (weaponType)
         {
-            infiniteAmmo = true;
-            autoReload = false;
+            case WeaponType.Platform:
+                infiniteAmmo = true;
+                autoReload = false;
+                break;
+            case WeaponType.Laser:
+                infiniteAmmo = true;
+                if (laserLine == null)
+                {
+                    laserLine = gameObject.AddComponent<LineRenderer>();
+                    laserLine.startWidth = 0.1f;
+                    laserLine.endWidth = 0.1f;
+                    laserLine.material = new Material(Shader.Find("Sprites/Default"));
+                    laserLine.startColor = Color.red;
+                    laserLine.endColor = Color.red;
+                }
+                break;
         }
     }
 
@@ -98,15 +118,22 @@ public class WeaponSystem : MonoBehaviour
 
         nextFireTime = Time.time + fireRate;
         PlayShootEffects();
-        FireProjectile();
 
-        // Effets spécifiques au type d'arme
         switch (weaponType)
         {
-            case WeaponType.AOE:
-                ApplyAOEEffect();
-                ApplyRecoil();
+            case WeaponType.Laser:
+                FireLaser();
                 break;
+            default:
+                FireProjectile();
+                break;
+        }
+
+        // Effets spécifiques au type d'arme
+        if (weaponType == WeaponType.AOE)
+        {
+            ApplyAOEEffect();
+            ApplyRecoil();
         }
     }
 
@@ -144,6 +171,42 @@ public class WeaponSystem : MonoBehaviour
         }
 
         IgnorePlayerCollision(projectile);
+    }
+
+    protected void FireLaser()
+    {
+        Vector2 direction = GetShootDirection();
+        Vector2 endPoint = (Vector2)firePoint.position + direction * laserRange;
+
+        // Vérifie les collisions
+        RaycastHit2D hit = Physics2D.Raycast(firePoint.position, direction, laserRange, crystalLayer);
+        
+        if (hit.collider != null)
+        {
+            endPoint = hit.point;
+            if (hit.collider.CompareTag("Crystal"))
+            {
+                Crystal crystal = hit.collider.GetComponent<Crystal>();
+                if (crystal != null)
+                {
+                    crystal.DestroyCrystal();
+                }
+            }
+        }
+
+        // Affiche le laser
+        StartCoroutine(DrawLaser(firePoint.position, endPoint));
+    }
+
+    private IEnumerator DrawLaser(Vector3 start, Vector3 end)
+    {
+        laserLine.enabled = true;
+        laserLine.SetPosition(0, start);
+        laserLine.SetPosition(1, end);
+
+        yield return new WaitForSeconds(laserDuration);
+
+        laserLine.enabled = false;
     }
 
     private void ApplyAOEEffect()
@@ -226,10 +289,18 @@ public class WeaponSystem : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        if (firePoint && weaponType == WeaponType.AOE)
+        if (firePoint)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(firePoint.position, aoeRadius);
+            if (weaponType == WeaponType.AOE)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(firePoint.position, aoeRadius);
+            }
+            else if (weaponType == WeaponType.Laser)
+            {
+                Gizmos.color = Color.blue;
+                Gizmos.DrawLine(firePoint.position, firePoint.position + (Vector3)GetShootDirection() * laserRange);
+            }
         }
     }
 }
