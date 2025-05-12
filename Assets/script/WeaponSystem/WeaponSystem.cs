@@ -220,15 +220,15 @@ public class WeaponSystem : MonoBehaviour
 
         foreach (Collider2D hit in hits)
         {
-            if (hit.CompareTag("Enemy"))
+            iDamageable damageable = hit.GetComponent<iDamageable>();
+            if (damageable != null)
             {
                 Vector2 toEnemy = (hit.transform.position - firePoint.position).normalized;
                 float angle = Vector2.Angle(shootDirection, toEnemy);
 
                 if (angle <= 60f)
                 {
-                    EnemyHealth enemy = hit.GetComponent<EnemyHealth>();
-                    if (enemy) enemy.TakeDamage(damage);
+                    damageable.Damage(damage);
                 }
             }
         }
