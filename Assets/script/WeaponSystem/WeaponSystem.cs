@@ -240,6 +240,10 @@ public class WeaponSystem : MonoBehaviour
 
         Vector2 direction = -GetShootDirection();
         playerRb.AddForce(direction * recoilForce, ForceMode2D.Impulse);
+        if (Camera.main != null && Camera.main.TryGetComponent(out CameraShake cameraShake))
+        {
+            cameraShake.Shake(0.01f, 0.02f);
+        }
     }
 
     protected Vector2 GetShootDirection()

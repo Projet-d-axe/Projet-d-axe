@@ -4,11 +4,11 @@
 - Active scene:
   - Name: SampleScene
   - Tags:
-    - Untagged, Respawn, Finish, EditorOnly, MainCamera, Player, GameController, coin, Enemy, Obstacle, Bullet
+    - Untagged, Respawn, Finish, EditorOnly, MainCamera, Player, GameController, coin, Enemy, Obstacle, Bullet, crystal
   - Layers:
-    - Default, TransparentFX, Ignore Raycast, Water, UI, Ground, wall, Player, Aimable, Platform, Enemy, Obstacle
+    - Default, TransparentFX, Ignore Raycast, Water, UI, Ground, wall, Player, Aimable, Platform, Enemy, Obstacle, Crystal
 - Active game object:
-  - Name: Square
-  - Tag: Untagged
+  - Name: Main Camera
+  - Tag: MainCamera
   - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
