@@ -14,11 +14,13 @@ public class EnemyBaseState
     public virtual void Enter()
     {
         Debug.Log("Entered" + animationName);
+        enemy.enemyData.anim.SetBool(animationName, true);
     }
 
     public virtual void Exit()
     {
         Debug.Log("Left" + animationName);
+        enemy.enemyData.anim.SetBool(animationName, true);
     }
 
     public virtual void LogicUpdate()

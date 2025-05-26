@@ -14,6 +14,11 @@ public class PatrolState : EnemyBaseState
         base.Enter();
     }
 
+    public override void Exit()
+    {
+        base.Exit();
+    }
+
     public override void LogicUpdate()
     {
 

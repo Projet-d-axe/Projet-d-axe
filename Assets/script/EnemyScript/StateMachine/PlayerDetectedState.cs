@@ -16,7 +16,7 @@ public class PlayerDetectedState : EnemyBaseState
 
     public override void Exit()
     {
-
+        base.Exit();
     }
 
     public override void LogicUpdate()
