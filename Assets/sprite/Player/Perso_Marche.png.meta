@@ -522,7 +522,23 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Perso_Marche_0: -7820799911507135047
+      Perso_Marche_1: 422839271318197529
+      Perso_Marche_10: -2140500901489018863
+      Perso_Marche_11: -5135800515250990576
+      Perso_Marche_12: -2290572433312985949
+      Perso_Marche_13: 6677355681124021774
+      Perso_Marche_14: -7339975829757812165
+      Perso_Marche_15: -2036386706015945436
+      Perso_Marche_2: -7706174303856872635
+      Perso_Marche_3: 8087365655547135644
+      Perso_Marche_4: 2992184937270981262
+      Perso_Marche_5: 7016789360853623226
+      Perso_Marche_6: 1996499984144604459
+      Perso_Marche_7: -656485974753373833
+      Perso_Marche_8: -44917504930166248
+      Perso_Marche_9: 2232390963678655427
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

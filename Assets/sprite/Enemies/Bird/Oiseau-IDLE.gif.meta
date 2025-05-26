@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Oiseau-IDLE_0: -1128097085262507216
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -497,7 +497,22 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Anime_perso_Idle_blink_0: -4925282595133366724
+      Anime_perso_Idle_blink_1: 2905903935316236585
+      Anime_perso_Idle_blink_10: -4197688001594167264
+      Anime_perso_Idle_blink_11: 6175512538750475820
+      Anime_perso_Idle_blink_12: 5472258544030337255
+      Anime_perso_Idle_blink_13: 1679255461697371746
+      Anime_perso_Idle_blink_14: -2239806980706412466
+      Anime_perso_Idle_blink_2: -2115258750859854053
+      Anime_perso_Idle_blink_3: -362584855076622385
+      Anime_perso_Idle_blink_4: 342323712931117686
+      Anime_perso_Idle_blink_5: -7881105083093015189
+      Anime_perso_Idle_blink_6: 2111385000545568872
+      Anime_perso_Idle_blink_7: 145504198414526783
+      Anime_perso_Idle_blink_8: -5134546558697852510
+      Anime_perso_Idle_blink_9: -915297719966249529
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

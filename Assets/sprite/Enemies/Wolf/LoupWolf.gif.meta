@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      LoupWolf_0: -3615432183621552670
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

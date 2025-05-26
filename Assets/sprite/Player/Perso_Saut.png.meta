@@ -347,7 +347,16 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Perso_Saut_0: 3186762272995947246
+      Perso_Saut_1: -8970724183675517053
+      Perso_Saut_2: -4436102624851755905
+      Perso_Saut_3: 4459283888009948994
+      Perso_Saut_4: 5854919620770042404
+      Perso_Saut_5: 5879563782181956843
+      Perso_Saut_6: -4732593874511256687
+      Perso_Saut_7: 4662666148020963369
+      Perso_Saut_8: 3416485857159680075
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
