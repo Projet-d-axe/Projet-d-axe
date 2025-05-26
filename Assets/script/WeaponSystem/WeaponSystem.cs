@@ -10,6 +10,8 @@ public class WeaponSystem : MonoBehaviour
 
     [Header("UI")]
     public string weaponName = "Weapon";
+    public Sprite weaponIcon;
+
     
     [Header("Base Settings")]
     public Transform firePoint;

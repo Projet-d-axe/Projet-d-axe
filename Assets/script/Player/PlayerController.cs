@@ -84,10 +84,9 @@ public class PlayerController : MonoBehaviour
     [Header("Weapons")]
     public List<WeaponSystem> weapons;
     private WeaponSystem currentWeapon;
-    private int currentWeaponIndex = 0;
+    public int currentWeaponIndex = 0;
     private bool isAiming;
     public TokenSystem tokenSystem;
-
 
     void Awake()
     {
@@ -322,9 +321,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButton("Fire1"))
             currentWeapon.TryShoot();
 
-        if (Input.GetKeyDown(KeyCode.R))
-            currentWeapon.Reload();
-
         // Changement d'arme avec vérification
         if (Input.GetKeyDown(KeyCode.Alpha1)) TrySwitchWeapon(0);
         if (Input.GetKeyDown(KeyCode.Alpha2)) TrySwitchWeapon(1);
@@ -338,23 +334,28 @@ public class PlayerController : MonoBehaviour
         {
             EquipWeapon(index);
         }
-        else
-        {
-            tokenSystem.PlayLockedWeaponFeedback();
-        }
     }
     
-    private void EquipWeapon(int index)
+   public void EquipWeapon(int index)
     {
-        foreach (var weapon in weapons)
-            weapon.gameObject.SetActive(false);
+        if (index >= 0 && index < weapons.Count && tokenSystem.IsWeaponUnlocked(index))
+        {
+            // Désactive toutes les armes
+            foreach (var weapon in weapons)
+                weapon.gameObject.SetActive(false);
 
-        currentWeaponIndex = index;
-        currentWeapon = weapons[currentWeaponIndex];
-        currentWeapon.gameObject.SetActive(true);
+            // Active la nouvelle arme
+            currentWeaponIndex = index;
+            currentWeapon = weapons[index];
+            currentWeapon.gameObject.SetActive(true);
 
-        if (weaponUI)
-            weaponUI.SetCurrentWeapon(currentWeapon, currentWeaponIndex);
+            // Met à jour l'UI
+            if (weaponUI != null)
+                weaponUI.SetCurrentWeapon(currentWeapon, currentWeaponIndex);
+
+            // Force la mise à jour visuelle
+            tokenSystem.UpdateWeaponUnlockStatus();
+        }
     }
 
     private void UpdateAnimations()

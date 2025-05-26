@@ -712,6 +712,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponType: 0
   weaponName: basic
+  weaponIcon: {fileID: 0}
   firePoint: {fileID: 1492555126}
   fireRate: 0.6
   maxAmmo: 30
@@ -1513,6 +1514,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponType: 3
   weaponName: laser
+  weaponIcon: {fileID: 0}
   firePoint: {fileID: 1044375293}
   fireRate: 0.2
   maxAmmo: 10
@@ -1971,7 +1973,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 410710f7e6a5d5e498ecb854b43006e3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1991,7 +1993,7 @@ Transform:
   m_GameObject: {fileID: 476404382}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.04, y: -3.21, z: 0}
+  m_LocalPosition: {x: 4.63, y: -3.21, z: 0}
   m_LocalScale: {x: 0.6349, y: 0.6978, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2066,7 +2068,6 @@ GameObject:
   - component: {fileID: 479618566}
   - component: {fileID: 479618565}
   - component: {fileID: 479618568}
-  - component: {fileID: 479618569}
   m_Layer: 0
   m_Name: gamemanager
   m_TagString: Untagged
@@ -2175,22 +2176,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsPaused: 0
---- !u!114 &479618569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 479618563}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f4f73dfefd6fa1468c8ed65255bb061, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ammoText: {fileID: 0}
-  weaponNameText: {fileID: 286426786}
-  ammoIcon: {fileID: 0}
-  weaponIcons: []
 --- !u!1001 &498127673
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2667,7 +2652,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: becc041e05073394dbca12c85ac62e87, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -3154,6 +3139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponType: 2
   weaponName: freeze
+  weaponIcon: {fileID: 0}
   firePoint: {fileID: 2012303854}
   fireRate: 0.2
   maxAmmo: 10
@@ -3581,7 +3567,7 @@ Transform:
   m_GameObject: {fileID: 1086709361}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.42, y: -3.01, z: 0}
+  m_LocalPosition: {x: 6.94, y: -2.02, z: 0}
   m_LocalScale: {x: 0.6349, y: 0.6978, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4982,6 +4968,7 @@ GameObject:
   - component: {fileID: 1852709241}
   - component: {fileID: 1852709240}
   - component: {fileID: 1852709239}
+  - component: {fileID: 1852709242}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -5083,6 +5070,31 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &1852709242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1852709237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f4f73dfefd6fa1468c8ed65255bb061, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentWeaponIcon: {fileID: 0}
+  ammoText: {fileID: 286426786}
+  weaponNameText: {fileID: 286426786}
+  weaponSlotIcons:
+  - {fileID: 131639659}
+  - {fileID: 769746234}
+  - {fileID: 123438531}
+  - {fileID: 1010227849}
+  equippedColor: {r: 1, g: 1, b: 1, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 0.3647059}
+  lockedColor: {r: 1, g: 0, b: 0, a: 1}
+  unlockEffect: {fileID: 0}
+  equipEffect: {fileID: 0}
 --- !u!1 &1883053541 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8414012513915395311, guid: a1fc3d7fc3151cb4697d412b144ffa03, type: 3}
@@ -5347,6 +5359,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponType: 1
   weaponName: shotgun
+  weaponIcon: {fileID: 0}
   firePoint: {fileID: 1971521492}
   fireRate: 0.2
   maxAmmo: 10
@@ -5695,7 +5708,7 @@ MonoBehaviour:
     m_Bits: 2048
   playerTag: Player
   enemyTag: Enemy
-  weaponUI: {fileID: 479618569}
+  weaponUI: {fileID: 0}
   moveSpeed: 8
   acceleration: 15
   deceleration: 20
@@ -5722,6 +5735,7 @@ MonoBehaviour:
   - {fileID: 886407848}
   - {fileID: 1961025377}
   - {fileID: 339900753}
+  currentWeaponIndex: 0
   tokenSystem: {fileID: 2122821561}
 --- !u!70 &2122821559
 CapsuleCollider2D:
@@ -5869,25 +5883,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274c68606454983468a5fc231828351b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tokensCollected: 0
   tokensRequiredPerWeapon: 1
-  allWeapons:
-  - {fileID: 160645413}
-  - {fileID: 886407848}
-  - {fileID: 1961025377}
-  - {fileID: 339900753}
-  tokensText: {fileID: 0}
-  weaponIcons:
-  - {fileID: 131639659}
-  - {fileID: 769746234}
-  - {fileID: 123438531}
-  - {fileID: 1010227849}
-  lockedWeaponColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  unlockedWeaponColor: {r: 1, g: 1, b: 1, a: 1}
-  unlockEffect: {fileID: 0}
-  unlockSound: {fileID: 0}
-  lockedWeaponSound: {fileID: 0}
-  lockedWeaponEffect: {fileID: 0}
+  unlockedWeaponIndices: 00000000
 --- !u!1 &2136816076
 GameObject:
   m_ObjectHideFlags: 0

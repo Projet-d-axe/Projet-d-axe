@@ -13,7 +13,7 @@ public class TokenPickup : MonoBehaviour
             TokenSystem tokenSystem = other.GetComponent<TokenSystem>();
             if (tokenSystem != null)
             {
-                tokenSystem.AddToken(tokenValue);
+                tokenSystem.AddToken();
                 
                 if (pickupEffect != null)
                     Instantiate(pickupEffect, transform.position, Quaternion.identity);
