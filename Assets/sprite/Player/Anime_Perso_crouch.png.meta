@@ -1,34 +1,31 @@
 fileFormatVersion: 2
-guid: dc6d9b933f0735b41b1c4410a04303a5
+guid: ef8af46886c3baa4082e7703d6177980
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3186762272995947246
-    second: Perso_Saut_0
+      213: -5563344581830896109
+    second: Anime_Perso_crouch_0
   - first:
-      213: -8970724183675517053
-    second: Perso_Saut_1
+      213: -291497364237134665
+    second: Anime_Perso_crouch_1
   - first:
-      213: -4436102624851755905
-    second: Perso_Saut_2
+      213: -3725121972734263519
+    second: Anime_Perso_crouch_2
   - first:
-      213: 4459283888009948994
-    second: Perso_Saut_3
+      213: -6171512699111528103
+    second: Anime_Perso_crouch_3
   - first:
-      213: 5854919620770042404
-    second: Perso_Saut_4
+      213: 5635921049960375394
+    second: Anime_Perso_crouch_4
   - first:
-      213: 5879563782181956843
-    second: Perso_Saut_5
+      213: 5940813104351753824
+    second: Anime_Perso_crouch_5
   - first:
-      213: -4732593874511256687
-    second: Perso_Saut_6
+      213: 4147446326245998056
+    second: Anime_Perso_crouch_6
   - first:
-      213: 4662666148020963369
-    second: Perso_Saut_7
-  - first:
-      213: 3416485857159680075
-    second: Perso_Saut_8
+      213: 8264458878715811387
+    second: Anime_Perso_crouch_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -120,216 +117,181 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Perso_Saut_0
+      name: Anime_Perso_crouch_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 1075
-        width: 527
-        height: 951
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 12
+        y: 259
+        width: 396
+        height: 761
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee23a813767a93c20800000000000000
-      internalID: 3186762272995947246
+      spriteID: 31610e424970bc2b0800000000000000
+      internalID: -5563344581830896109
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Perso_Saut_1
+      name: Anime_Perso_crouch_1
       rect:
         serializedVersion: 2
-        x: 602
-        y: 1100
-        width: 560
-        height: 927
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 445
+        y: 263
+        width: 451
+        height: 757
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 387c30642e5918380800000000000000
-      internalID: -8970724183675517053
+      spriteID: 7b4deaf01b464fbf0800000000000000
+      internalID: -291497364237134665
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Perso_Saut_2
+      name: Anime_Perso_crouch_2
       rect:
         serializedVersion: 2
-        x: 1286
-        y: 1127
-        width: 650
-        height: 901
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 957
+        y: 264
+        width: 434
+        height: 755
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f7c788a8a2ccf62c0800000000000000
-      internalID: -4436102624851755905
+      spriteID: 12ffb266d45bd4cc0800000000000000
+      internalID: -3725121972734263519
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Perso_Saut_3
+      name: Anime_Perso_crouch_3
       rect:
         serializedVersion: 2
-        x: 2047
-        y: 1143
-        width: 734
-        height: 885
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1450
+        y: 267
+        width: 452
+        height: 752
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 24fa471e11f82ed30800000000000000
-      internalID: 4459283888009948994
+      spriteID: 95925a2f5e16a5aa0800000000000000
+      internalID: -6171512699111528103
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Perso_Saut_4
+      name: Anime_Perso_crouch_4
       rect:
         serializedVersion: 2
-        x: 2886
-        y: 1107
-        width: 650
-        height: 924
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1964
+        y: 259
+        width: 458
+        height: 760
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4229678df5ad04150800000000000000
-      internalID: 5854919620770042404
+      spriteID: 264e805a550d63e40800000000000000
+      internalID: 5635921049960375394
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Perso_Saut_5
+      name: Anime_Perso_crouch_5
       rect:
         serializedVersion: 2
-        x: 3536
-        y: 1630
-        width: 6
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 2511
+        y: 264
+        width: 572
+        height: 756
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bec253fcb18689150800000000000000
-      internalID: 5879563782181956843
+      spriteID: 0663fd9ea02027250800000000000000
+      internalID: 5940813104351753824
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Perso_Saut_6
+      name: Anime_Perso_crouch_6
       rect:
         serializedVersion: 2
-        x: 2537
-        y: 1142
-        width: 7
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3115
+        y: 258
+        width: 458
+        height: 761
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 193219b02f2725eb0800000000000000
-      internalID: -4732593874511256687
+      spriteID: 8ed34e8a570be8930800000000000000
+      internalID: 4147446326245998056
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Perso_Saut_7
+      name: Anime_Perso_crouch_7
       rect:
         serializedVersion: 2
-        x: 50
-        y: 52
-        width: 627
-        height: 981
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 3616
+        y: 255
+        width: 419
+        height: 755
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9284703682e15b040800000000000000
-      internalID: 4662666148020963369
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Perso_Saut_8
-      rect:
-        serializedVersion: 2
-        x: 692
-        y: 31
-        width: 558
-        height: 1003
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b40162829cbc96f20800000000000000
-      internalID: 3416485857159680075
+      spriteID: b36ddae209141b270800000000000000
+      internalID: 8264458878715811387
       vertices: []
       indices: 
       edges: []
@@ -338,7 +300,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 499f316abb0976542857c3968d09991e
     internalID: 0
     vertices: []
     indices: 
@@ -348,15 +310,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Perso_Saut_0: 3186762272995947246
-      Perso_Saut_1: -8970724183675517053
-      Perso_Saut_2: -4436102624851755905
-      Perso_Saut_3: 4459283888009948994
-      Perso_Saut_4: 5854919620770042404
-      Perso_Saut_5: 5879563782181956843
-      Perso_Saut_6: -4732593874511256687
-      Perso_Saut_7: 4662666148020963369
-      Perso_Saut_8: 3416485857159680075
+      Anime_Perso_crouch_0: -5563344581830896109
+      Anime_Perso_crouch_1: -291497364237134665
+      Anime_Perso_crouch_2: -3725121972734263519
+      Anime_Perso_crouch_3: -6171512699111528103
+      Anime_Perso_crouch_4: 5635921049960375394
+      Anime_Perso_crouch_5: 5940813104351753824
+      Anime_Perso_crouch_6: 4147446326245998056
+      Anime_Perso_crouch_7: 8264458878715811387
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

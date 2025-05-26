@@ -11,6 +11,7 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     [Header("Core Settings")]
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private float invincibilityDuration = 0.5f;
+    private bool isInvincible;
     private int currentHealth;
     private float lastDamageTime;
     private bool isDead;
@@ -133,6 +134,18 @@ public class PlayerHealth : MonoBehaviour, iDamageable
 
     public void Damage(int damageAmount)
     {
-        TakeDamage(damageAmount);
+        if (!isInvincible)
+        {
+            TakeDamage(damageAmount);
+        }
+    }
+
+    public void StartInvincibility()
+    {
+        isInvincible = true;
+    }
+    public void StopInvincibility()
+    {
+        isInvincible = false;
     }
 }

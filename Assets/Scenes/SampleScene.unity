@@ -2934,7 +2934,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 403.2, y: 215.3}
+  m_AnchoredPosition: {x: 403.2, y: 215.30002}
   m_SizeDelta: {x: 766, y: 430.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1291980679
@@ -4633,7 +4633,7 @@ Animator:
   m_GameObject: {fileID: 2122821543}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9c0c227db946726419ed28dd35b7d225, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -4763,8 +4763,8 @@ MonoBehaviour:
   coyoteTime: 0.15
   jumpBufferTime: 0.1
   maxJumpCount: 2
-  rollSpeed: 12
-  rollDuration: 0.2
+  rollSpeed: 10
+  rollDuration: 0.5
   rollCooldown: 0.5
   LongJumpSpeed: 20
   crouchSpeedMultiplier: 0.5

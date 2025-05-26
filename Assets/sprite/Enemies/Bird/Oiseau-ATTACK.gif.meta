@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Oiseau-ATTACK_0: -817647659806536542
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

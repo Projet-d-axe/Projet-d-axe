@@ -37,6 +37,7 @@ public class PlayerController : MonoBehaviour
     [Range(0f, 1f)] public float airControl = 0.6f;
     private float moveInput;
     private bool isFacingRight = true;
+    private float xSpeed;
 
     // === JUMP ===
     [Header("Jump")]
@@ -49,6 +50,7 @@ public class PlayerController : MonoBehaviour
     private float lastGroundedTime;
     private float jumpBufferCounter;
     private int jumpCount;
+    private float ySpeed;
 
     // === ROLL ===
     [Header("Roll")]
@@ -122,6 +124,16 @@ public class PlayerController : MonoBehaviour
     {
         if (!isFastFalling)
             ApplyGravityModifier();
+
+        ySpeed = rb.linearVelocityY;
+        xSpeed = Mathf.Abs(rb.linearVelocityX);
+
+        
+        anim.SetFloat("ySpeed", ySpeed);
+        anim.SetFloat("xSpeed", Mathf.Abs(moveInput));
+       
+
+        
     }
 
     private void GetInputs()
@@ -175,6 +187,7 @@ public class PlayerController : MonoBehaviour
     {
         if (jumpBufferCounter > 0 && (isGrounded || Time.time < lastGroundedTime + coyoteTime || jumpCount < maxJumpCount))
         {
+            anim.SetTrigger("jump");
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             jumpBufferCounter = 0;
             jumpCount++;
@@ -244,9 +257,10 @@ public class PlayerController : MonoBehaviour
 
     private void HandleRoll()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= nextRollTime)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= nextRollTime && isGrounded)
         {
             float dir = Mathf.Sign(moveInput != 0 ? moveInput : transform.localScale.x);
+            anim.SetTrigger("roll");
             StartCoroutine(PerformRoll(dir));
         }
     }
@@ -349,5 +363,10 @@ public class PlayerController : MonoBehaviour
             Gizmos.color = isGrounded ? Color.green : Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
+    }
+
+    public void ForceStun()
+    {
+
     }
 }

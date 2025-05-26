@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      COUTEAU_GOBLIN_0: 2706123190287981219
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

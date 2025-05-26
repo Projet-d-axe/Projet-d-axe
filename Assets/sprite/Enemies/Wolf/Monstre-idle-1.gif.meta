@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Monstre-idle-1_0: 2621299788067807553
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
