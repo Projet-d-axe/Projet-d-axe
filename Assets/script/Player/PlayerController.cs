@@ -6,19 +6,21 @@ using System.Collections.Generic;
 [RequireComponent(typeof(CapsuleCollider2D))]
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(SpriteRenderer))]
-public class PlayerController : MonoBehaviour, iDamageable
+public class PlayerController : MonoBehaviour
 {
     // === VARIABLES ===
     [Header("Player Settings")]
     public float maxHealth = 100f;
     private float currentHealth;
-    public float invincibilityDuration = 1f;
-    private bool isInvincible = false;
-    private SpriteRenderer spriteRenderer;
 
     // === LAYERS ===
     public LayerMask groundLayerMask;
     public LayerMask enemyLayerMask;
+
+    // === TAGS ===
+    public string playerTag = "Player";
+    public string enemyTag = "Enemy";
+
 
     // === COMPONENTS ===
     private Rigidbody2D rb;
@@ -35,6 +37,7 @@ public class PlayerController : MonoBehaviour, iDamageable
     [Range(0f, 1f)] public float airControl = 0.6f;
     private float moveInput;
     private bool isFacingRight = true;
+    private float xSpeed;
 
     // === JUMP ===
     [Header("Jump")]
@@ -47,6 +50,7 @@ public class PlayerController : MonoBehaviour, iDamageable
     private float lastGroundedTime;
     private float jumpBufferCounter;
     private int jumpCount;
+    private float ySpeed;
 
     // === ROLL ===
     [Header("Roll")]
@@ -89,12 +93,9 @@ public class PlayerController : MonoBehaviour, iDamageable
         col = GetComponent<CapsuleCollider2D>();
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
 
         originalColliderSize = col.size;
         originalColliderOffset = col.offset;
-
-        currentHealth = maxHealth;
 
         if (weapons.Count > 0)
             EquipWeapon(0);
@@ -121,7 +122,18 @@ public class PlayerController : MonoBehaviour, iDamageable
 
     void FixedUpdate()
     {
-        ApplyGravityModifier();
+        if (!isFastFalling)
+            ApplyGravityModifier();
+
+        ySpeed = rb.linearVelocityY;
+        xSpeed = Mathf.Abs(rb.linearVelocityX);
+
+        
+        anim.SetFloat("ySpeed", ySpeed);
+        anim.SetFloat("xSpeed", Mathf.Abs(moveInput));
+       
+
+        
     }
 
     private void GetInputs()
@@ -132,23 +144,6 @@ public class PlayerController : MonoBehaviour, iDamageable
             jumpBufferCounter = jumpBufferTime;
         else
             jumpBufferCounter -= Time.deltaTime;
-    }
-
-    private void CheckGrounded()
-    {
-        bool wasGrounded = isGrounded;
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-
-        if (isGrounded)
-        {
-            jumpCount = 0;
-            isFastFalling = false;
-            if (!wasGrounded) isRolling = false;
-        }
-        else if (wasGrounded)
-        {
-            lastGroundedTime = Time.time;
-        }
     }
 
     private void HandleMovement()
@@ -166,10 +161,10 @@ public class PlayerController : MonoBehaviour, iDamageable
         if (isCrouching) targetSpeed *= crouchSpeedMultiplier;
         if (isAiming && currentWeapon != null) targetSpeed *= currentWeapon.aimingMoveSpeedMultiplier;
 
-        float speedDifference = targetSpeed - rb.linearVelocity.x;
-        float movement = speedDifference * accel * control;
-
-        rb.AddForce(new Vector2(movement, 0));
+        rb.linearVelocity = new Vector2(
+            Mathf.Lerp(rb.linearVelocity.x, targetSpeed, accel * control * Time.deltaTime),
+            rb.linearVelocity.y
+        );
 
         if (moveInput != 0 && !isRolling)
             FlipCharacter();
@@ -180,9 +175,11 @@ public class PlayerController : MonoBehaviour, iDamageable
         if ((moveInput > 0 && !isFacingRight) || (moveInput < 0 && isFacingRight))
         {
             isFacingRight = !isFacingRight;
-            Vector3 scale = transform.localScale;
-            scale.x *= -1;
-            transform.localScale = scale;
+            transform.localScale = new Vector3(
+                -transform.localScale.x,
+                transform.localScale.y,
+                transform.localScale.z
+            );
         }
     }
 
@@ -190,6 +187,7 @@ public class PlayerController : MonoBehaviour, iDamageable
     {
         if (jumpBufferCounter > 0 && (isGrounded || Time.time < lastGroundedTime + coyoteTime || jumpCount < maxJumpCount))
         {
+            anim.SetTrigger("jump");
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             jumpBufferCounter = 0;
             jumpCount++;
@@ -198,9 +196,24 @@ public class PlayerController : MonoBehaviour, iDamageable
 
     private void ApplyGravityModifier()
     {
-        if (!isFastFalling && rb.linearVelocity.y < 0)
-        {
+        if (rb.linearVelocity.y < 0)
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+    }
+
+    private void CheckGrounded()
+    {
+        bool wasGrounded = isGrounded;
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        if (isGrounded)
+        {
+            jumpCount = 0;
+            isFastFalling = false;
+            if (!wasGrounded) isRolling = false;
+        }
+        else if (wasGrounded)
+        {
+            lastGroundedTime = Time.time;
         }
     }
 
@@ -225,7 +238,7 @@ public class PlayerController : MonoBehaviour, iDamageable
     private bool CheckCeiling()
     {
         float checkHeight = originalColliderSize.y - col.size.y;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, checkHeight, groundLayer);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, checkHeight, ~LayerMask.GetMask("Player"));
         return hit.collider != null;
     }
 
@@ -234,7 +247,7 @@ public class PlayerController : MonoBehaviour, iDamageable
         if (!isGrounded && Input.GetAxisRaw("Vertical") < 0 && rb.linearVelocity.y < 0)
         {
             isFastFalling = true;
-            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fastFallSpeed - 1) * Time.deltaTime;
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fastFallSpeed - 1f) * Time.deltaTime;
         }
         else
         {
@@ -244,16 +257,19 @@ public class PlayerController : MonoBehaviour, iDamageable
 
     private void HandleRoll()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= nextRollTime)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && Time.time >= nextRollTime && isGrounded)
         {
             float dir = Mathf.Sign(moveInput != 0 ? moveInput : transform.localScale.x);
+            anim.SetTrigger("roll");
             StartCoroutine(PerformRoll(dir));
         }
     }
 
     private IEnumerator PerformRoll(float direction)
     {
+        bool rollJump = false;
         isRolling = true;
+        Debug.Log("Start Roll");
         nextRollTime = Time.time + rollCooldown;
 
         float startTime = Time.time;
@@ -262,11 +278,24 @@ public class PlayerController : MonoBehaviour, iDamageable
 
         while (Time.time < startTime + rollTime)
         {
-            rb.linearVelocity = new Vector2(speed * direction, rb.linearVelocity.y);
+            if (!rollJump)
+            {
+                rb.linearVelocity = new Vector2(speed * direction, rb.linearVelocity.y);
+                yield return null;
+            }
+            
+
+            if (Input.GetButtonDown("Jump") || rollJump)
+            {
+                rb.linearVelocity = new Vector2(LongJumpSpeed * direction, jumpForce);
+                rollJump = true;
+                Debug.Log("Long Jump !");
+            }
             yield return null;
         }
 
         isRolling = false;
+        Debug.Log("Stop Roll");
     }
 
     private void HandleAiming()
@@ -294,16 +323,14 @@ public class PlayerController : MonoBehaviour, iDamageable
         if (Input.GetKeyDown(KeyCode.R))
             currentWeapon.Reload();
 
+        // Changement d'arme
         if (Input.GetKeyDown(KeyCode.Alpha1)) EquipWeapon(0);
         if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
         if (Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
-        if (Input.GetKeyDown(KeyCode.Alpha4) && weapons.Count > 3) EquipWeapon(3);
     }
 
     private void EquipWeapon(int index)
     {
-        if (index < 0 || index >= weapons.Count) return;
-
         foreach (var weapon in weapons)
             weapon.gameObject.SetActive(false);
 
@@ -329,46 +356,17 @@ public class PlayerController : MonoBehaviour, iDamageable
             anim.SetInteger("CurrentAmmo", currentWeapon.GetCurrentAmmo());
     }
 
-    public void Damage(int damageAmount)
-    {
-        if (isInvincible) return;
-
-        currentHealth -= damageAmount;
-        StartCoroutine(InvincibilityFlash());
-
-        if (currentHealth <= 0)
-            Die();
-    }
-
-    private IEnumerator InvincibilityFlash()
-    {
-        isInvincible = true;
-        float flashDuration = invincibilityDuration / 10;
-        
-        for (int i = 0; i < 5; i++)
-        {
-            spriteRenderer.color = new Color(1, 0, 0, 0.5f);
-            yield return new WaitForSeconds(flashDuration);
-            spriteRenderer.color = Color.white;
-            yield return new WaitForSeconds(flashDuration);
-        }
-
-        isInvincible = false;
-    }
-
-    private void Die()
-    {
-        anim.SetTrigger("Die");
-        enabled = false;
-        // Ajouter ici d'autres effets de mort si nécessaire
-    }
-
-    void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
         if (groundCheck != null)
         {
             Gizmos.color = isGrounded ? Color.green : Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
+    }
+
+    public void ForceStun()
+    {
+
     }
 }
