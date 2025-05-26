@@ -178,9 +178,8 @@ public class WeaponSystem : MonoBehaviour
         Vector2 direction = GetShootDirection();
         Vector2 endPoint = (Vector2)firePoint.position + direction * laserRange;
 
-        // Vérifie les collisions
         RaycastHit2D hit = Physics2D.Raycast(firePoint.position, direction, laserRange, crystalLayer);
-        
+
         if (hit.collider != null)
         {
             endPoint = hit.point;
@@ -189,12 +188,10 @@ public class WeaponSystem : MonoBehaviour
                 Crystal crystal = hit.collider.GetComponent<Crystal>();
                 if (crystal != null)
                 {
-                    crystal.DestroyCrystal();
+                    crystal.Activate(); 
                 }
             }
         }
-
-        // Affiche le laser
         StartCoroutine(DrawLaser(firePoint.position, endPoint));
     }
 

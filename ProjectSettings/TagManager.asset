@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - Obstacle
   - Bullet
+  - Crystal
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - Platform
   - Enemy
   - Obstacle
-  - 
+  - Crystal
   - 
   - 
   - 

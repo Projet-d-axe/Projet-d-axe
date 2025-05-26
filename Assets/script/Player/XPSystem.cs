@@ -149,13 +149,6 @@ public class XPSystem : MonoBehaviour
     void LevelUp()
     {
         currentLevel++;
-        skillPoints += statPointsPerLevel;
-        
-        if (currentLevel % bonusSkillPointsEvery == 0)
-        {
-            skillPoints++;
-            Debug.Log("Bonus skill point for reaching level " + currentLevel);
-        }
 
         currentXP -= maxXP;
         maxXP = CalculateXPForLevel(currentLevel);
@@ -176,11 +169,6 @@ public class XPSystem : MonoBehaviour
         UpdateUI();
     }
 
-    public void AddStatModifier(StatModifier modifier)
-    {
-        activeModifiers.Add(modifier);
-        UpdateUI();
-    }
 
     void UpdateTemporaryModifiers()
     {
@@ -198,35 +186,6 @@ public class XPSystem : MonoBehaviour
         }
     }
 
-    public void AddStrength()
-    {
-        if (skillPoints > 0)
-        {
-            baseStrength++;
-            skillPoints--;
-            UpdateUI();
-        }
-    }
-
-    public void AddAgility()
-    {
-        if (skillPoints > 0)
-        {
-            baseAgility++;
-            skillPoints--;
-            UpdateUI();
-        }
-    }
-
-    public void AddFireRate()
-    {
-        if (skillPoints > 0)
-        {
-            baseFireRate += 0.1f;
-            skillPoints--;
-            UpdateUI();
-        }
-    }
 
     void UpdateUI()
     {
@@ -239,26 +198,6 @@ public class XPSystem : MonoBehaviour
         if (levelText != null)
         {
             levelText.text = "Niveau : " + currentLevel;
-        }
-
-        if (skillPointsText != null)
-        {
-            skillPointsText.text = "Points : " + skillPoints;
-        }
-
-        if (strengthText != null)
-        {
-            strengthText.text = "Force : " + TotalStrength;
-        }
-        
-        if (agilityText != null)
-        {
-            agilityText.text = "Agilité : " + TotalAgility;
-        }
-        
-        if (fireRateText != null)
-        {
-            fireRateText.text = "Vit. Tir : " + TotalFireRate.ToString("F1");
         }
     }
 

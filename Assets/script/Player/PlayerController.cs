@@ -86,6 +86,8 @@ public class PlayerController : MonoBehaviour
     private WeaponSystem currentWeapon;
     private int currentWeaponIndex = 0;
     private bool isAiming;
+    public TokenSystem tokenSystem;
+
 
     void Awake()
     {
@@ -323,13 +325,25 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
             currentWeapon.Reload();
 
-        // Changement d'arme
-        if (Input.GetKeyDown(KeyCode.Alpha1)) EquipWeapon(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2) && weapons.Count > 1) EquipWeapon(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3) && weapons.Count > 2) EquipWeapon(2);
-        if (Input.GetKeyDown(KeyCode.Alpha4) && weapons.Count > 3) EquipWeapon(3);
+        // Changement d'arme avec vérification
+        if (Input.GetKeyDown(KeyCode.Alpha1)) TrySwitchWeapon(0);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) TrySwitchWeapon(1);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) TrySwitchWeapon(2);
+        if (Input.GetKeyDown(KeyCode.Alpha4)) TrySwitchWeapon(3);
     }
 
+    private void TrySwitchWeapon(int index)
+    {
+        if (index < weapons.Count && tokenSystem.IsWeaponUnlocked(index))
+        {
+            EquipWeapon(index);
+        }
+        else
+        {
+            tokenSystem.PlayLockedWeaponFeedback();
+        }
+    }
+    
     private void EquipWeapon(int index)
     {
         foreach (var weapon in weapons)
