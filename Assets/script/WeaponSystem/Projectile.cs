@@ -1,9 +1,14 @@
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class Bullet : MonoBehaviour, iDamageable
 {
     public int damage = 1;
     public float lifeTime = 3f;
+
+    public void Damage(int amount)
+    {
+        Despawn();
+    }
 
     private float timer;
     private ObjectPool pool;
@@ -29,13 +34,13 @@ public class Bullet : MonoBehaviour
     {
         if (collision.isTrigger) return;
 
-        if (collision.CompareTag("Enemy"))
+        
+        iDamageable damageable = collision.GetComponent<iDamageable>();
+        if (damageable != null)
         {
-            EnemyHealth enemy = collision.GetComponent<EnemyHealth>();
-            if (enemy) enemy.TakeDamage(damage);
+            damageable.Damage(damage);
+            Despawn();
         }
-
-        Despawn();
     }
 
     void Despawn()

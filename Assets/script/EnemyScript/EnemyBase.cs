@@ -6,7 +6,7 @@ using System;
 
 public class EnemyBase : MonoBehaviour, iDamageable
 {
-    [Header("Références")]
+    [Header("Rï¿½fï¿½rences")]
     public EnemyData enemyData;
     public Rigidbody2D rb;
     public Transform edgeDetect;

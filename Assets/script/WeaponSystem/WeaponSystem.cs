@@ -12,7 +12,6 @@ public class WeaponSystem : MonoBehaviour
     public string weaponName = "Weapon";
     public Sprite weaponIcon;
 
-    
     [Header("Base Settings")]
     public Transform firePoint;
     public float fireRate = 0.2f;
@@ -20,15 +19,17 @@ public class WeaponSystem : MonoBehaviour
     public int reserveAmmo = 30;
     public float reloadTime = 1f;
     public bool autoReload = true;
-    public bool infiniteAmmo = false;
-    public bool lockMovementWhenAiming { get; set; }
+    public bool lockMovementWhenAiming;
     public float aimingMoveSpeedMultiplier = 0.5f;
+    
+    [Header("Infinite Ammo")]
+    public bool infiniteAmmo = false;
 
     [Header("Projectile Settings")]
     public GameObject projectilePrefab;
-    public ObjectPool projectilePool;
-    public float projectileSpeed = 10f;
+    public float projectileSpeed = 15f;
     public int damage = 1;
+    public float projectileLifetime = 3f;
 
     [Header("AOE Settings")]
     public float aoeRadius = 3f;
@@ -49,78 +50,106 @@ public class WeaponSystem : MonoBehaviour
     public ParticleSystem muzzleFlash;
     public AudioClip shootSound;
     public AudioClip reloadSound;
+    [Range(0,1)] public float volume = 0.7f;
 
-    protected int currentAmmo;
-    protected float nextFireTime;
-    protected bool isReloading;
-    protected AudioSource audioSource;
-    protected Rigidbody2D playerRb;
+    // État interne
+    private int currentAmmo;
+    private float nextFireTime;
+    private bool isReloading;
+    private AudioSource audioSource;
+    private Rigidbody2D playerRb;
 
-    protected virtual void Awake()
+    void Awake()
+    {
+        InitializeComponents();
+        ConfigureWeaponType();
+    }
+
+    void Start()
+    {
+        currentAmmo = maxAmmo;
+        ValidateWeaponSetup();
+    }
+
+    void InitializeComponents()
     {
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.spatialBlend = 1f;
-            audioSource.volume = 0.7f;
+            audioSource.volume = volume;
         }
 
         playerRb = GetComponentInParent<Rigidbody2D>();
+    }
 
-        // Configuration spécifique au type d'arme
-        switch (weaponType)
+    void ValidateWeaponSetup()
+    {
+        if (projectilePrefab == null && weaponType != WeaponType.Laser)
         {
-            case WeaponType.Platform:
-                infiniteAmmo = true;
-                autoReload = false;
-                break;
-            case WeaponType.Laser:
-                infiniteAmmo = true;
-                if (laserLine == null)
-                {
-                    laserLine = gameObject.AddComponent<LineRenderer>();
-                    laserLine.startWidth = 0.1f;
-                    laserLine.endWidth = 0.1f;
-                    laserLine.material = new Material(Shader.Find("Sprites/Default"));
-                    laserLine.startColor = Color.red;
-                    laserLine.endColor = Color.red;
-                }
-                break;
+            Debug.LogError($"[{weaponName}] Projectile Prefab manquant !");
+        }
+
+        if (firePoint == null)
+        {
+            Debug.LogError($"[{weaponName}] Fire Point manquant !");
+        }
+
+        if (weaponType == WeaponType.Platform && platformPrefab == null)
+        {
+            Debug.LogWarning($"[{weaponName}] Platform Prefab manquant !");
+        }
+
+        if (weaponType == WeaponType.Laser && laserLine == null)
+        {
+            Debug.LogWarning($"[{weaponName}] Laser Line manquant !");
         }
     }
 
-    void Start()
+    void ConfigureWeaponType()
     {
-        currentAmmo = maxAmmo;
+        if (weaponType == WeaponType.Laser && laserLine == null)
+        {
+            laserLine = gameObject.AddComponent<LineRenderer>();
+            laserLine.startWidth = 0.1f;
+            laserLine.endWidth = 0.1f;
+            laserLine.material = new Material(Shader.Find("Sprites/Default"));
+            laserLine.startColor = Color.red;
+            laserLine.endColor = Color.red;
+        }
     }
 
-    public virtual void TryShoot()
+    public void TryShoot()
     {
-        if (Time.time < nextFireTime || isReloading) return;
-
-        if (!infiniteAmmo && currentAmmo <= 0)
-        {
-            if (autoReload && reserveAmmo > 0)
-                Reload();
-            return;
-        }
-
+        if (!CanShoot()) return;
         Shoot();
     }
 
-    protected virtual void Shoot()
+    bool CanShoot()
     {
-        if (!infiniteAmmo)
+        if (Time.time < nextFireTime || isReloading) return false;
+        if (infiniteAmmo) return true;
+        if (currentAmmo <= 0)
         {
-            currentAmmo--;
-            if (currentAmmo <= 0 && reserveAmmo > 0 && autoReload)
-                Reload();
+            if (autoReload && reserveAmmo > 0) Reload();
+            return false;
         }
+        return true;
+    }
 
-        nextFireTime = Time.time + fireRate;
+    void Shoot()
+    {
+        ExecuteShoot();
+        UpdateAmmo();
         PlayShootEffects();
+        HandleWeaponSpecificEffects();
+        
+        if (ShouldReload()) Reload();
+    }
 
+    void ExecuteShoot()
+    {
         switch (weaponType)
         {
             case WeaponType.Laser:
@@ -130,140 +159,124 @@ public class WeaponSystem : MonoBehaviour
                 FireProjectile();
                 break;
         }
-
-        // Effets spécifiques au type d'arme
-        if (weaponType == WeaponType.AOE)
-        {
-            ApplyAOEEffect();
-            ApplyRecoil();
-        }
     }
 
-    protected virtual void FireProjectile()
+    void UpdateAmmo()
     {
-        GameObject projectile = null;
+        if (!infiniteAmmo) currentAmmo--;
+        nextFireTime = Time.time + fireRate;
+    }
 
-        if (projectilePool)
-        {
-            projectile = projectilePool.Get(firePoint.position, firePoint.rotation);
-        }
-        else if (projectilePrefab)
-        {
-            projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-        }
+    bool ShouldReload()
+    {
+        return !infiniteAmmo && currentAmmo <= 0 && reserveAmmo > 0 && autoReload;
+    }
 
-        if (projectile == null) return;
+    void FireProjectile()
+    {
+        if (projectilePrefab == null || firePoint == null) return;
 
+        GameObject projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        ConfigureProjectile(projectile);
+        Destroy(projectile, projectileLifetime);
+    }
+
+    void ConfigureProjectile(GameObject projectile)
+    {
         Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
         if (rb) rb.linearVelocity = GetShootDirection() * projectileSpeed;
 
-        // Configuration spécifique au projectile
-        if (weaponType == WeaponType.Platform && projectile.TryGetComponent(out PlatformProjectile platformProj))
+        Bullet bullet = projectile.GetComponent<Bullet>();
+        if (bullet) bullet.damage = damage;
+
+        if (weaponType == WeaponType.Platform)
         {
-            platformProj.platformPrefab = platformPrefab;
-            platformProj.lifeTime = platformDuration;
-            if (projectilePool != null)
-                platformProj.SetPool(projectilePool);
-        }
-        else if (projectile.TryGetComponent(out Bullet bullet))
-        {
-            bullet.damage = damage;
-            if (projectilePool != null)
-                bullet.SetPool(projectilePool);
+            PlatformProjectile platform = projectile.GetComponent<PlatformProjectile>();
+            if (platform)
+            {
+                platform.platformPrefab = platformPrefab;
+                platform.lifeTime = platformDuration;
+            }
         }
 
         IgnorePlayerCollision(projectile);
     }
 
-    protected void FireLaser()
+    void FireLaser()
     {
         Vector2 direction = GetShootDirection();
         Vector2 endPoint = (Vector2)firePoint.position + direction * laserRange;
 
         RaycastHit2D hit = Physics2D.Raycast(firePoint.position, direction, laserRange, crystalLayer);
-
         if (hit.collider != null)
         {
             endPoint = hit.point;
-            if (hit.collider.CompareTag("Crystal"))
-            {
-                Crystal crystal = hit.collider.GetComponent<Crystal>();
-                if (crystal != null)
-                {
-                    crystal.Activate(); 
-                }
-            }
+            Crystal crystal = hit.collider.GetComponent<Crystal>();
+            if (crystal) crystal.Activate();
         }
+
         StartCoroutine(DrawLaser(firePoint.position, endPoint));
     }
 
-    private IEnumerator DrawLaser(Vector3 start, Vector3 end)
+    IEnumerator DrawLaser(Vector3 start, Vector3 end)
     {
         laserLine.enabled = true;
         laserLine.SetPosition(0, start);
         laserLine.SetPosition(1, end);
 
         yield return new WaitForSeconds(laserDuration);
-
         laserLine.enabled = false;
     }
 
-    private void ApplyAOEEffect()
+    void HandleWeaponSpecificEffects()
     {
-        if (weaponType != WeaponType.AOE) return;
+        if (weaponType == WeaponType.AOE) ApplyAOEEffect();
+        if (recoilForce > 0) ApplyRecoil();
+    }
 
-        Vector2 origin = firePoint.position;
+    void ApplyAOEEffect()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(firePoint.position, aoeRadius, enemyLayer);
         Vector2 shootDirection = GetShootDirection();
-
-        Collider2D[] hits = Physics2D.OverlapCircleAll(origin, aoeRadius, enemyLayer);
 
         foreach (Collider2D hit in hits)
         {
             iDamageable damageable = hit.GetComponent<iDamageable>();
-            if (damageable != null)
+            if (damageable != null && Vector2.Angle(shootDirection, (hit.transform.position - firePoint.position).normalized) <= 60f)
             {
-                Vector2 toEnemy = (hit.transform.position - firePoint.position).normalized;
-                float angle = Vector2.Angle(shootDirection, toEnemy);
-
-                if (angle <= 60f)
-                {
-                    damageable.Damage(damage);
-                }
+                damageable.Damage(damage);
             }
         }
     }
 
-    private void ApplyRecoil()
-{
-    if (weaponType != WeaponType.AOE || playerRb == null || recoilForce <= 0) return;
-
-    Vector2 direction = -GetShootDirection();
-    playerRb.AddForce(direction * recoilForce, ForceMode2D.Impulse);
-    
-
-    if (Camera.main != null && Camera.main.TryGetComponent(out CameraController cameraController))
+    void ApplyRecoil()
     {
-        cameraController.Shake(0.1f); 
+        if (playerRb == null || recoilForce <= 0) return;
+        
+        Vector2 recoilDirection = -GetShootDirection() * recoilForce;
+        playerRb.AddForce(recoilDirection, ForceMode2D.Impulse);
+        
+        CameraController cameraController = Camera.main?.GetComponent<CameraController>();
+        cameraController?.Shake(0.1f);
     }
-}
 
-    protected Vector2 GetShootDirection()
+    Vector2 GetShootDirection()
     {
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         return (mousePos - firePoint.position).normalized;
     }
 
-    protected void IgnorePlayerCollision(GameObject projectile)
+    void IgnorePlayerCollision(GameObject projectile)
     {
         Collider2D projCol = projectile.GetComponent<Collider2D>();
         Collider2D playerCol = GetComponentInParent<Collider2D>();
         if (projCol && playerCol) Physics2D.IgnoreCollision(projCol, playerCol);
     }
 
-    protected void PlayShootEffects()
+    void PlayShootEffects()
     {
-        if (muzzleFlash) muzzleFlash.Play();
-        if (shootSound) audioSource.PlayOneShot(shootSound);
+        muzzleFlash?.Play();
+        if (shootSound) audioSource.PlayOneShot(shootSound, volume);
     }
 
     public void Reload()
@@ -272,40 +285,37 @@ public class WeaponSystem : MonoBehaviour
         StartCoroutine(ReloadRoutine());
     }
 
-    protected virtual IEnumerator ReloadRoutine()
+    IEnumerator ReloadRoutine()
     {
         isReloading = true;
-        if (reloadSound) audioSource.PlayOneShot(reloadSound);
+        if (reloadSound) audioSource.PlayOneShot(reloadSound, volume);
 
         yield return new WaitForSeconds(reloadTime);
 
-        int bulletsNeeded = maxAmmo - currentAmmo;
-        int bulletsToLoad = Mathf.Min(bulletsNeeded, reserveAmmo);
-
+        int bulletsToLoad = Mathf.Min(maxAmmo - currentAmmo, reserveAmmo);
         currentAmmo += bulletsToLoad;
         reserveAmmo -= bulletsToLoad;
 
         isReloading = false;
     }
 
-    public int GetCurrentAmmo() => infiniteAmmo ? 999 : currentAmmo;
-    public int GetReserveAmmo() => infiniteAmmo ? -1 : reserveAmmo;
+    public int GetCurrentAmmo() => infiniteAmmo ? maxAmmo : currentAmmo;
+    public int GetReserveAmmo() => infiniteAmmo ? 999 : reserveAmmo;
     public bool IsReloading() => isReloading;
 
     void OnDrawGizmosSelected()
     {
-        if (firePoint)
+        if (!firePoint) return;
+
+        Gizmos.color = weaponType == WeaponType.AOE ? Color.red : Color.blue;
+        
+        if (weaponType == WeaponType.AOE)
         {
-            if (weaponType == WeaponType.AOE)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(firePoint.position, aoeRadius);
-            }
-            else if (weaponType == WeaponType.Laser)
-            {
-                Gizmos.color = Color.blue;
-                Gizmos.DrawLine(firePoint.position, firePoint.position + (Vector3)GetShootDirection() * laserRange);
-            }
+            Gizmos.DrawWireSphere(firePoint.position, aoeRadius);
+        }
+        else if (weaponType == WeaponType.Laser)
+        {
+            Gizmos.DrawLine(firePoint.position, firePoint.position + (Vector3)GetShootDirection() * laserRange);
         }
     }
 }
