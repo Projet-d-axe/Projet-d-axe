@@ -22,11 +22,7 @@ public class MenuManager : MonoBehaviour
         {
             Debug.Log("Escape key pressed");
             if (mainMenuCanvas != null)
-            {
-                // L'erreur se produit parce que 'Canvas' n'a pas de méthode 'SetActive'.  
-                // 'SetActive' est une méthode de la classe 'GameObject', pas de 'Canvas'.  
-                // Pour corriger cela, vous devez accéder au GameObject associé au Canvas et appeler 'SetActive' dessus.  
-                // Voici la correction :  
+            { 
                 if (mainMenuCanvas.gameObject.activeSelf)
                 {
                     Debug.Log("Disabling Main Menu");
