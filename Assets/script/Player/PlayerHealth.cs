@@ -11,10 +11,13 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     [Header("Core Settings")]
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private float invincibilityDuration = 0.5f;
-    private bool isInvincible;
+    [SerializeField] private Animator anim;
+    private bool isInvincible = false;
     private int currentHealth;
     private float lastDamageTime;
     private bool isDead;
+    
+
 
     // Références UI
     [Header("UI References")]
@@ -45,6 +48,7 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     {
         currentHealth = maxHealth;
         UpdateHealthUI();
+        anim = GetComponent<Animator>();
     }
 
     /// <summary>
@@ -101,6 +105,8 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     // Méthodes d'effets visuels
     private void PlayHurtEffects()
     {
+        anim.SetTrigger("isHit");
+
         // Son aléatoire
         if (hurtSounds.Length > 0)
         {
@@ -134,10 +140,9 @@ public class PlayerHealth : MonoBehaviour, iDamageable
 
     public void Damage(int damageAmount)
     {
-        if (!isInvincible)
-        {
+        
             TakeDamage(damageAmount);
-        }
+        
     }
 
     public void StartInvincibility()
