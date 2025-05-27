@@ -288,7 +288,7 @@ public class PlayerController : MonoBehaviour
 
             if (Input.GetButtonDown("Jump") || rollJump)
             {
-                rb.linearVelocity = new Vector2(LongJumpSpeed * direction, jumpForce);
+                rb.linearVelocity = new Vector2(LongJumpSpeed * direction, jumpForce/2);
                 rollJump = true;
                 Debug.Log("Long Jump !");
             }
