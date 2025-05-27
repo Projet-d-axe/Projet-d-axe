@@ -31,14 +31,30 @@ public class WeaponUI : MonoBehaviour
     private void InitializeUI()
     {
         var playerController = FindObjectOfType<PlayerController>();
-        if (playerController == null) return;
+        if (playerController == null)
+        {
+            Debug.LogWarning("[WeaponUI] PlayerController not found!");
+            return;
+        }
 
         var weapons = playerController.weapons;
 
+        if (weaponSlotIcons == null || weaponSlotIcons.Length == 0)
+        {
+            Debug.LogWarning("[WeaponUI] No weapon slot icons assigned!");
+            return;
+        }
+
         for (int i = 0; i < weaponSlotIcons.Length && i < weapons.Count; i++)
         {
+            if (weaponSlotIcons[i] == null)
+            {
+                Debug.LogWarning($"[WeaponUI] Weapon slot icon at index {i} is null!");
+                continue;
+            }
+
             var weapon = weapons[i];
-            if (weapon.weaponIcon != null)
+            if (weapon != null && weapon.weaponIcon != null)
             {
                 weaponSlotIcons[i].sprite = weapon.weaponIcon;
             }
@@ -49,25 +65,43 @@ public class WeaponUI : MonoBehaviour
         currentEquippedIndex = 0;
     }
 
-
     public void SetCurrentWeapon(WeaponSystem weapon, int weaponIndex)
     {
-        currentWeaponIcon.sprite = weapon.weaponIcon;
+        if (weapon == null)
+        {
+            Debug.LogWarning("[WeaponUI] Trying to set null weapon!");
+            return;
+        }
 
-        weaponNameText.text = weapon.weaponName;
+        if (currentWeaponIcon != null)
+        {
+            currentWeaponIcon.sprite = weapon.weaponIcon;
+        }
+
+        if (weaponNameText != null)
+        {
+            weaponNameText.text = weapon.weaponName;
+        }
         
         UpdateWeaponSlots(weaponIndex);
-
         PlayEquipEffect(weaponIndex);
     }
 
     private void UpdateWeaponSlots(int equippedIndex)
     {
+        if (weaponSlotIcons == null || weaponSlotIcons.Length == 0)
+        {
+            Debug.LogWarning("[WeaponUI] No weapon slot icons to update!");
+            return;
+        }
+
         currentEquippedIndex = equippedIndex;
         
         for (int i = 0; i < weaponSlotIcons.Length; i++)
         {
-            if (tokenSystem.IsWeaponUnlocked(i))
+            if (weaponSlotIcons[i] == null) continue;
+
+            if (tokenSystem != null && tokenSystem.IsWeaponUnlocked(i))
             {
                 weaponSlotIcons[i].color = (i == equippedIndex) ? equippedColor : unlockedColor;
                 weaponSlotIcons[i].transform.localScale = (i == equippedIndex) ? Vector3.one * 1.1f : Vector3.one;
@@ -84,10 +118,15 @@ public class WeaponUI : MonoBehaviour
         UpdateWeaponSlots(equippedIndex);
     }
 
-
     public void UnlockWeapon(int weaponIndex)
     {
-        if (weaponIndex < weaponSlotIcons.Length)
+        if (weaponSlotIcons == null || weaponIndex >= weaponSlotIcons.Length)
+        {
+            Debug.LogWarning($"[WeaponUI] Cannot unlock weapon at index {weaponIndex}: invalid index or no slots!");
+            return;
+        }
+
+        if (weaponSlotIcons[weaponIndex] != null)
         {
             weaponSlotIcons[weaponIndex].color = unlockedColor;
             PlayUnlockEffect(weaponIndex);
@@ -96,7 +135,7 @@ public class WeaponUI : MonoBehaviour
 
     private void PlayUnlockEffect(int index)
     {
-        if (unlockEffect != null)
+        if (unlockEffect != null && index < weaponSlotIcons.Length && weaponSlotIcons[index] != null)
         {
             Instantiate(unlockEffect, weaponSlotIcons[index].transform.position, Quaternion.identity);
         }
@@ -104,7 +143,7 @@ public class WeaponUI : MonoBehaviour
 
     private void PlayEquipEffect(int index)
     {
-        if (equipEffect != null)
+        if (equipEffect != null && index < weaponSlotIcons.Length && weaponSlotIcons[index] != null)
         {
             Instantiate(equipEffect, weaponSlotIcons[index].transform.position, Quaternion.identity);
         }
