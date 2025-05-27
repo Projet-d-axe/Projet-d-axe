@@ -42,10 +42,15 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     public bool IsInvincible => Time.time < lastDamageTime + invincibilityDuration;
 
     private void Awake()
+{
+    currentHealth = maxHealth;
+    if (healthSlider != null)
     {
-        currentHealth = maxHealth;
-        UpdateHealthUI();
+        healthSlider.maxValue = maxHealth;
+        healthSlider.value = currentHealth;
     }
+    UpdateHealthUI();
+}
 
     /// <summary>
     /// Applique des dégâts au joueur avec gestion d'invincibilité

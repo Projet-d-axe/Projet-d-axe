@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8235392447637714ea57d332e5598c91
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 151055
+  packageName: Platformer Microgame
+  packageVersion: 4.0
+  assetPath: Assets/Scenes/SampleScene.unity
+  uploadId: 683079
