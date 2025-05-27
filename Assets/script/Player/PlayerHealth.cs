@@ -12,10 +12,9 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     [Header("Core Settings")]
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private float invincibilityDuration = 0.5f;
-<<<<<<< HEAD
+
     [SerializeField] private float deathDelay = 1f; // Délai avant le redémarrage de la scène
-=======
->>>>>>> parent of 49dca79 (Player Controller Update, animation updates)
+
     private bool isInvincible;
     private int currentHealth;
     private float lastDamageTime;
