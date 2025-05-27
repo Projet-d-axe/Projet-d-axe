@@ -234,16 +234,18 @@ public class WeaponSystem : MonoBehaviour
     }
 
     private void ApplyRecoil()
-    {
-        if (weaponType != WeaponType.AOE || playerRb == null || recoilForce <= 0) return;
+{
+    if (weaponType != WeaponType.AOE || playerRb == null || recoilForce <= 0) return;
 
-        Vector2 direction = -GetShootDirection();
-        playerRb.AddForce(direction * recoilForce, ForceMode2D.Impulse);
-        if (Camera.main != null && Camera.main.TryGetComponent(out CameraShake cameraShake))
-        {
-            cameraShake.Shake(0.01f, 0.02f);
-        }
+    Vector2 direction = -GetShootDirection();
+    playerRb.AddForce(direction * recoilForce, ForceMode2D.Impulse);
+    
+
+    if (Camera.main != null && Camera.main.TryGetComponent(out CameraController cameraController))
+    {
+        cameraController.Shake(0.1f); 
     }
+}
 
     protected Vector2 GetShootDirection()
     {
