@@ -6,7 +6,7 @@ using System;
 
 public class EnemyBase : MonoBehaviour, iDamageable
 {
-    [Header("R�f�rences")]
+    [Header("Références")]
     public EnemyData enemyData;
     public Rigidbody2D rb;
     public Transform edgeDetect;
@@ -29,6 +29,8 @@ public class EnemyBase : MonoBehaviour, iDamageable
     public float orientX = 1f;
     public float stateTime;
     public bool canAttack = true;
+
+    public Transform[] patrolPoints;
 
 
     private void Awake()
@@ -55,7 +57,6 @@ public class EnemyBase : MonoBehaviour, iDamageable
     // Update is called once per frame
     void FixedUpdate()
     {
-
         currentState.PhysicsUpdate();
     }
 
@@ -65,6 +66,7 @@ public class EnemyBase : MonoBehaviour, iDamageable
         RaycastHit2D wallHit = Physics2D.Raycast(edgeDetect.position, orientX == 1 ? Vector2.right : Vector2.left, enemyData.wallDetection, wall);
         if (hit.collider == null || wallHit.collider == true)
         {
+            Debug.Log($"hit collider response : {hit.collider}");
             return true;
         }
         else

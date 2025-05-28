@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6577b085a78ae6f46ad0cd8fb1a65705, type: 3}
+  m_Name: Test
+  m_EditorClassIdentifier: 
+  enemyName: Test
+  eType: 2
+  mType: 1
+  pv: 100
+  iFrameDuration: 0.5
+  damage: 10
+  attackCooldown: 0
+  attackRange: 2
+  attackSpeed: 1
+  knockbackAngle: {x: 0, y: 0}
+  knockbackForce: 0
+  detectionRange: 10
+  playerDetectedWaitTime: 1
+  forgetRange: 15
+  canForget: 0
+  edgeDetection: 0
+  wallDetection: 0
+  canFallOffLedges: 0
+  speed: 5
+  prefab: {fileID: 0}
+  deathObject: {fileID: 0}
+  deathSfx: {fileID: 0}
+  attackObject: {fileID: 0}

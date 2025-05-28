@@ -55,6 +55,11 @@ public class AttackState : EnemyBaseState
         {
             RangedAttackPlayer();
         }
+
+        else if (enemy.enemyData.eType == EnemyType.Flying)
+        {
+
+        }
     }
 
     void ChasePlayer()

@@ -19,7 +19,7 @@ public class PatrolState : EnemyBaseState
 
         if (enemy.CheckForPlayer())
             enemy.SwitchStates(enemy.playerDetectedState);
-        if (enemy.CheckForObstacles())
+        if (enemy.CheckForObstacles() && enemy.enemyData.eType != EnemyType.Flying)
         {
             TurnAround();
         }
@@ -32,11 +32,15 @@ public class PatrolState : EnemyBaseState
             enemy.Corroutine1();
         }
 
-        else
+        else if (enemy.enemyData.mType == MovementType.Random)
         {
             enemy.rb.linearVelocity = new Vector2(enemy.enemyData.speed * enemy.orientX, enemy.rb.linearVelocity.y);
         }
-        
+
+        else if (enemy.enemyData.mType == MovementType.Patrol)
+        {
+            enemy.transform.position = Vector2.MoveTowards(enemy.transform.position, enemy.patrolPoints[0].position, enemy.enemyData.speed * Time.deltaTime);
+        }
     }
 
     
@@ -45,6 +49,6 @@ public class PatrolState : EnemyBaseState
     {
         enemy.transform.Rotate(0, 180, 0);
         enemy.orientX = enemy.orientX * -1;
-
+        Debug.Log("Flipping");
     }
 }
