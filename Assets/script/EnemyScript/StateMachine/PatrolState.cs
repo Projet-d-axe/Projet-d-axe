@@ -16,12 +16,18 @@ public class PatrolState : EnemyBaseState
 
     public override void LogicUpdate()
     {
-
-        if (enemy.CheckForPlayer())
-            enemy.SwitchStates(enemy.playerDetectedState);
-        if (enemy.CheckForObstacles() && enemy.enemyData.eType != EnemyType.Flying)
+        if(enemy.enemyData.eType == EnemyType.Melee || enemy.enemyData.eType == EnemyType.Ranged)
         {
-            TurnAround();
+            if (enemy.CheckForPlayer())
+                enemy.SwitchStates(enemy.playerDetectedState);
+
+            if (enemy.CheckForObstacles())
+                TurnAround();
+        }
+        
+        else if (enemy.enemyData.eType == EnemyType.Flying)
+        {
+
         }
     }
 
