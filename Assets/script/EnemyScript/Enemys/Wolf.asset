@@ -15,7 +15,7 @@ MonoBehaviour:
   enemyName: 
   eType: 0
   mType: 1
-  pv: 100
+  pv: -4
   iFrameDuration: 0.5
   damage: 20
   attackCooldown: 1

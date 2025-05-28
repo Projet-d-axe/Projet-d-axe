@@ -1,9 +1,14 @@
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public class Bullet : MonoBehaviour, iDamageable
 {
     public int damage = 1;
     public float lifeTime = 3f;
+
+    public void Damage(int amount)
+    {
+        Despawn();
+    }
 
     private float timer;
     private ObjectPool pool;
@@ -16,6 +21,7 @@ public class Bullet : MonoBehaviour
     void OnEnable()
     {
         timer = lifeTime;
+        Debug.Log("[Bullet] Bullet spawned");
     }
 
     void Update()
@@ -27,19 +33,30 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.isTrigger) return;
-
-        if (collision.CompareTag("Enemy"))
+        Debug.Log($"[Bullet] Collision detected with {collision.gameObject.name}");
+        
+        if (collision.isTrigger)
         {
-            EnemyHealth enemy = collision.GetComponent<EnemyHealth>();
-            if (enemy) enemy.TakeDamage(damage);
+            Debug.Log("[Bullet] Ignoring trigger collision");
+            return;
         }
 
-        Despawn();
+        iDamageable damageable = collision.GetComponent<iDamageable>();
+        if (damageable != null)
+        {
+            Debug.Log($"[Bullet] Found iDamageable component, applying {damage} damage");
+            damageable.Damage(damage);
+            Despawn();
+        }
+        else
+        {
+            Debug.Log("[Bullet] No iDamageable component found on collision target");
+        }
     }
 
     void Despawn()
     {
+        Debug.Log("[Bullet] Bullet despawned");
         if (pool != null)
             pool.ReturnToPool(gameObject);
         else
