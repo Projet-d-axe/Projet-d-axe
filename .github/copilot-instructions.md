@@ -8,7 +8,7 @@
   - Layers:
     - Default, TransparentFX, Ignore Raycast, Water, UI, Ground, wall, Player, Aimable, Platform, Enemy, Obstacle, Crystal
 - Active game object:
-  - Name: Layer1
+  - Name: plateforme_fine_noire_0
   - Tag: Untagged
   - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
