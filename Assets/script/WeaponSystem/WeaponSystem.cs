@@ -215,6 +215,18 @@ public class WeaponSystem : MonoBehaviour
             if (crystal) crystal.Activate();
         }
 
+        // Vérifier si on touche un ennemi
+        RaycastHit2D enemyHit = Physics2D.Raycast(firePoint.position, direction, laserRange);
+        if (enemyHit.collider != null && enemyHit.collider.CompareTag("Enemy"))
+        {
+            endPoint = enemyHit.point;
+            iDamageable damageable = enemyHit.collider.GetComponent<iDamageable>();
+            if (damageable != null)
+            {
+                damageable.Damage(damage);
+            }
+        }
+
         StartCoroutine(DrawLaser(firePoint.position, endPoint));
     }
 

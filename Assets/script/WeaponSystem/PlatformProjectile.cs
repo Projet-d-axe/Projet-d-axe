@@ -31,14 +31,25 @@ public class PlatformProjectile : MonoBehaviour
 
         if (collision.CompareTag("Enemy"))
         {
-            Vector3 enemyPos = collision.transform.position;
-            Destroy(collision.gameObject);
-            Instantiate(platformPrefab, enemyPos, Quaternion.identity);
-            Despawn();
-            return;
+            Enemy enemy = collision.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                // Inflige des dégâts à l'ennemi
+                enemy.TakeDamage(1);
+                
+                // Vérifie si l'ennemi est à 1 PV ou moins
+                if (enemy.GetCurrentHealth() <= 1)
+                {
+                    Vector3 enemyPos = collision.transform.position;
+                    Destroy(collision.gameObject);
+                    Instantiate(platformPrefab, enemyPos, Quaternion.identity);
+                }
+                Despawn();
+                return;
+            }
         }
 
-        Despawn(); // aucune plateforme si ce n’est pas un ennemi
+        Despawn(); // aucune plateforme si ce n'est pas un ennemi
     }
 
     void Despawn()

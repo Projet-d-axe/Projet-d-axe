@@ -100,4 +100,9 @@ public class Enemy : MonoBehaviour
         // Death effects, scoring, etc.
         Destroy(gameObject);
     }
+
+    public float GetCurrentHealth()
+    {
+        return currentHealth;
+    }
 }

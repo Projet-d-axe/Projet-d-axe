@@ -6,6 +6,7 @@ public class Crystal : MonoBehaviour
     public bool canBeActivated = true;
     public bool isOneTimeUse = true;
     public float activationDelay = 0f;
+    public float destroyDelay = 0.5f; // Délai avant la destruction du cristal
 
     [Header("Effects")]
     public ParticleSystem activationEffect;
@@ -54,7 +55,16 @@ public class Crystal : MonoBehaviour
 
         foreach (GameObject obj in objectsToActivate)
         {
-            if (obj != null) obj.SetActive(true);
+            if (obj != null)
+            {
+                obj.SetActive(true);
+                // Activer la porte si c'est une porte
+                Door door = obj.GetComponent<Door>();
+                if (door != null)
+                {
+                    door.Activate();
+                }
+            }
         }
 
         foreach (MonoBehaviour component in componentsToEnable)
@@ -62,7 +72,26 @@ public class Crystal : MonoBehaviour
             if (component != null) component.enabled = true;
         }
 
-        if (isOneTimeUse) canBeActivated = false;
+        if (isOneTimeUse)
+        {
+            canBeActivated = false;
+            // Détruire le cristal après un délai
+            Invoke("DestroyCrystal", destroyDelay);
+        }
+    }
+
+    private void DestroyCrystal()
+    {
+        // Jouer les effets de destruction si nécessaire
+        if (activationEffect != null)
+        {
+            ParticleSystem destructionEffect = Instantiate(activationEffect, transform.position, Quaternion.identity);
+            destructionEffect.Play();
+            Destroy(destructionEffect.gameObject, destructionEffect.main.duration);
+        }
+
+        // Détruire le cristal
+        Destroy(gameObject);
     }
 
     //Méthode pour réinitialiser le crystal
