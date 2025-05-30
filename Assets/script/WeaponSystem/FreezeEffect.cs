@@ -34,7 +34,7 @@ public class FreezeEffect : MonoBehaviour
         // Désactiver le Rigidbody2D
         if (rb != null)
         {
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
             rb.isKinematic = true;
         }
 

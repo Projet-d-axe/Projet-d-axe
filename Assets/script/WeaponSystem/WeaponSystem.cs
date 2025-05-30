@@ -191,11 +191,11 @@ public class WeaponSystem : MonoBehaviour
 
         if (weaponType == WeaponType.Platform)
         {
-            PlatformProjectile platform = projectile.GetComponent<PlatformProjectile>();
+            FreezeProjectile platform = projectile.GetComponent<FreezeProjectile>();
             if (platform)
             {
                 platform.platformPrefab = platformPrefab;
-                platform.lifeTime = platformDuration;
+                platform.freezeDuration = platformDuration;
             }
         }
 

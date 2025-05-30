@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1197706534526247500}
   - component: {fileID: 1888693486421732408}
   - component: {fileID: 8315982595908917695}
-  - component: {fileID: 6782060763318135939}
+  - component: {fileID: 4126110708898155717}
   m_Layer: 0
   m_Name: bullet prefab platform
   m_TagString: Bullet
@@ -163,7 +163,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 0.5}
   m_EdgeRadius: 0
---- !u!114 &6782060763318135939
+--- !u!114 &4126110708898155717
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -172,8 +172,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7552773832786012762}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23b7ea7ae4d98bd42a641b43be2e3227, type: 3}
+  m_Script: {fileID: 11500000, guid: 41f5d314a2dba334badfbd42f0ea75ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platformPrefab: {fileID: 0}
-  lifeTime: 15
+  freezeDuration: 3
+  platformPrefab: {fileID: 8414012513915395311, guid: a1fc3d7fc3151cb4697d412b144ffa03, type: 3}
+  damage: 1

@@ -112,7 +112,7 @@ public class PlayerHealth : MonoBehaviour, iDamageable
         if (deathSound && audioSource) 
             audioSource.PlayOneShot(deathSound);
 
-        // Désactiver le joueur
+        // Désactiver le joueur temporairement
         var collider = GetComponent<Collider2D>();
         if (collider != null) collider.enabled = false;
         
@@ -123,16 +123,8 @@ public class PlayerHealth : MonoBehaviour, iDamageable
         var playerController = GetComponent<PlayerController>();
         if (playerController != null) playerController.enabled = false;
 
-        Debug.Log("Player died, restarting scene in " + deathDelay + " seconds");
-        
-        // Redémarrer la scène après un délai
-        StartCoroutine(RestartSceneAfterDelay());
-    }
-
-    private System.Collections.IEnumerator RestartSceneAfterDelay()
-    {
-        yield return new WaitForSeconds(deathDelay);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        // Respawn au dernier checkpoint
+        CheckpointManager.Instance.RespawnPlayer();
     }
 
     // Méthodes d'effets visuels
