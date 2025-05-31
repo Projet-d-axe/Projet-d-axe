@@ -4,12 +4,8 @@ public class CheckpointManager : MonoBehaviour
 {
     public static CheckpointManager Instance { get; private set; }
 
-    [Header("Respawn Settings")]
-    public float respawnDelay = 1f;
-    public GameObject respawnEffect;
-
-    private Vector3 currentCheckpoint;
-    private bool hasCheckpoint = false;
+    private Vector3 lastCheckpointPosition;
+    private bool hasCheckpoint;
 
     private void Awake()
     {
@@ -18,6 +14,7 @@ public class CheckpointManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            Debug.Log("[CheckpointManager] Instance créée");
         }
         else
         {
@@ -25,9 +22,9 @@ public class CheckpointManager : MonoBehaviour
         }
     }
 
-    public void SetCurrentCheckpoint(Vector3 position)
+    public void SetCheckpoint(Vector3 position)
     {
-        currentCheckpoint = position;
+        lastCheckpointPosition = position;
         hasCheckpoint = true;
         Debug.Log($"[CheckpointManager] Nouveau checkpoint défini à {position}");
     }
@@ -36,53 +33,75 @@ public class CheckpointManager : MonoBehaviour
     {
         if (!hasCheckpoint)
         {
-            Debug.LogWarning("[CheckpointManager] Tentative de respawn sans checkpoint actif");
+            Debug.LogWarning("[CheckpointManager] Pas de checkpoint actif !");
             return;
         }
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        if (player == null)
         {
-            StartCoroutine(RespawnRoutine(player));
-        }
-        else
-        {
-            Debug.LogError("[CheckpointManager] Player non trouvé !");
-        }
-    }
-
-    private System.Collections.IEnumerator RespawnRoutine(GameObject player)
-    {
-        // Désactiver les contrôles du joueur
-        PlayerController playerController = player.GetComponent<PlayerController>();
-        if (playerController != null)
-        {
-            playerController.enabled = false;
+            Debug.LogError("[CheckpointManager] Joueur non trouvé !");
+            return;
         }
 
-        // Attendre le délai de respawn
-        yield return new WaitForSeconds(respawnDelay);
+        Debug.Log($"[CheckpointManager] Début de la téléportation du joueur de {player.transform.position} à {lastCheckpointPosition}");
 
-        // Téléporter le joueur au checkpoint
-        player.transform.position = currentCheckpoint;
+        // Désactiver temporairement les composants
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+        CapsuleCollider2D collider = player.GetComponent<CapsuleCollider2D>();
+        PlayerController controller = player.GetComponent<PlayerController>();
 
-        // Effet de respawn
-        if (respawnEffect != null)
+        if (rb != null)
         {
-            Instantiate(respawnEffect, currentCheckpoint, Quaternion.identity);
+            rb.simulated = false;
+            rb.linearVelocity = Vector2.zero;
+            Debug.Log("[CheckpointManager] Rigidbody désactivé");
         }
 
-        // Réactiver les contrôles du joueur
-        if (playerController != null)
+        if (collider != null)
         {
-            playerController.enabled = true;
+            collider.enabled = false;
+            Debug.Log("[CheckpointManager] Collider désactivé");
         }
 
-        // Restaurer la santé du joueur
-        PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
-        if (playerHealth != null)
+        if (controller != null)
         {
-            playerHealth.ResetHealth();
+            controller.enabled = false;
+            Debug.Log("[CheckpointManager] Controller désactivé");
         }
+
+        // Téléporter le joueur
+        player.transform.position = lastCheckpointPosition;
+        Debug.Log($"[CheckpointManager] Position du joueur mise à jour : {player.transform.position}");
+
+        // Réactiver les composants
+        if (rb != null)
+        {
+            rb.simulated = true;
+            Debug.Log("[CheckpointManager] Rigidbody réactivé");
+        }
+
+        if (collider != null)
+        {
+            collider.enabled = true;
+            Debug.Log("[CheckpointManager] Collider réactivé");
+        }
+
+        if (controller != null)
+        {
+            controller.enabled = true;
+            controller.ResetState();
+            Debug.Log("[CheckpointManager] Controller réactivé et réinitialisé");
+        }
+
+        // Réinitialiser la santé
+        PlayerHealth health = player.GetComponent<PlayerHealth>();
+        if (health != null)
+        {
+            health.ResetHealth();
+            Debug.Log("[CheckpointManager] Santé réinitialisée");
+        }
+
+        Debug.Log("[CheckpointManager] Téléportation terminée");
     }
 } 

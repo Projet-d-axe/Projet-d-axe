@@ -2,91 +2,79 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
-    [Header("Visual Effects")]
-    public bool useVisualEffects = true;
-    public Color activeColor = Color.green;
-    public Color inactiveColor = Color.red;
+    [Header("Visual Feedback")]
+    public bool activateOnTouch = true;
+    public GameObject activeVisual;
+    public GameObject inactiveVisual;
     public ParticleSystem activationEffect;
 
     [Header("Audio")]
+    public AudioSource audioSource;
     public AudioClip activationSound;
-    [Range(0, 1)] public float volume = 0.7f;
 
-    private SpriteRenderer spriteRenderer;
-    private AudioSource audioSource;
     private bool isActivated = false;
 
-    private void Awake()
+    private void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        audioSource = GetComponent<AudioSource>();
-
-        if (audioSource == null && activationSound != null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.volume = volume;
-        }
-
-        // Définir la couleur initiale
-        if (useVisualEffects && spriteRenderer != null)
-        {
-            spriteRenderer.color = inactiveColor;
-        }
+        // Configuration initiale
+        UpdateVisuals();
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.CompareTag("Player") && !isActivated)
+        if (!activateOnTouch || isActivated) return;
+
+        if (other.CompareTag("Player"))
         {
             ActivateCheckpoint();
         }
     }
 
-    private void ActivateCheckpoint()
+    public void ActivateCheckpoint()
     {
-        // Désactiver tous les autres checkpoints
-        Checkpoint[] allCheckpoints = FindObjectsOfType<Checkpoint>();
-        foreach (Checkpoint checkpoint in allCheckpoints)
+        if (isActivated) return;
+
+        isActivated = true;
+        
+        // Sauvegarder la position
+        if (CheckpointManager.Instance != null)
         {
-            if (checkpoint != this)
-            {
-                checkpoint.Deactivate();
-            }
+            CheckpointManager.Instance.SetCheckpoint(transform.position);
+            Debug.Log($"[Checkpoint] Checkpoint activé à {transform.position}");
+        }
+        else
+        {
+            Debug.LogError("[Checkpoint] CheckpointManager non trouvé !");
+            return;
         }
 
-        // Activer ce checkpoint
-        isActivated = true;
-
-        // Sauvegarder la position
-        CheckpointManager.Instance.SetCurrentCheckpoint(transform.position);
-
         // Effets visuels
-        if (useVisualEffects)
+        UpdateVisuals();
+        if (activationEffect != null)
         {
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.color = activeColor;
-            }
-
-            if (activationEffect != null)
-            {
-                activationEffect.Play();
-            }
+            activationEffect.Play();
         }
 
         // Effet sonore
-        if (activationSound != null && audioSource != null)
+        if (audioSource != null && activationSound != null)
         {
-            audioSource.PlayOneShot(activationSound, volume);
+            audioSource.PlayOneShot(activationSound);
         }
     }
 
-    private void Deactivate()
+    private void UpdateVisuals()
     {
-        isActivated = false;
-        if (useVisualEffects && spriteRenderer != null)
-        {
-            spriteRenderer.color = inactiveColor;
-        }
+        if (activeVisual != null)
+            activeVisual.SetActive(isActivated);
+        
+        if (inactiveVisual != null)
+            inactiveVisual.SetActive(!isActivated);
+    }
+
+    // Pour activer/désactiver manuellement le checkpoint (utile pour les éditeurs de niveau)
+    public void SetActivated(bool activated)
+    {
+        isActivated = activated;
+        UpdateVisuals();
     }
 } 

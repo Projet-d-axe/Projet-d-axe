@@ -12,8 +12,7 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     [Header("Core Settings")]
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private float invincibilityDuration = 0.5f;
-
-    [SerializeField] private float deathDelay = 1f; // Délai avant le redémarrage de la scène
+    [SerializeField] private float deathDelay = 1f;
 
     private bool isInvincible;
     private int currentHealth;
@@ -41,6 +40,12 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     public UnityEvent OnDeath;
     public UnityEvent OnDamageTaken;
 
+    // Composants
+    private Collider2D playerCollider;
+    private Rigidbody2D playerRigidbody;
+    private PlayerController playerController;
+    private Vector3 lastPosition;
+
     // Propriétés d'accès
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
@@ -48,12 +53,18 @@ public class PlayerHealth : MonoBehaviour, iDamageable
 
     private void Awake()
     {
+        // Récupérer les références aux composants
+        playerCollider = GetComponent<Collider2D>();
+        playerRigidbody = GetComponent<Rigidbody2D>();
+        playerController = GetComponent<PlayerController>();
+
         currentHealth = maxHealth;
         if (healthSlider != null)
         {
             healthSlider.maxValue = maxHealth;
             healthSlider.value = currentHealth;
         }
+
         UpdateHealthUI();
     }
 
@@ -62,8 +73,22 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     /// </summary>
     public void TakeDamage(int damage)
     {
-        if (isDead || IsInvincible) return;
-        Debug.Log(currentHealth);
+        Debug.Log($"[PlayerHealth] TakeDamage appelé avec {damage} dégâts");
+        
+        if (isDead)
+        {
+            Debug.Log("[PlayerHealth] Déjà mort, dégâts ignorés");
+            return;
+        }
+        
+        if (IsInvincible)
+        {
+            Debug.Log("[PlayerHealth] Invincible, dégâts ignorés");
+            return;
+        }
+
+        Debug.Log($"[PlayerHealth] Vie avant dégâts: {currentHealth}");
+        lastPosition = transform.position;
         currentHealth = Mathf.Max(0, currentHealth - damage);
         lastDamageTime = Time.time;
 
@@ -73,7 +98,11 @@ public class PlayerHealth : MonoBehaviour, iDamageable
         OnDamageTaken?.Invoke();
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        if (currentHealth <= 0) Die();
+        if (currentHealth <= 0)
+        {
+            Debug.Log("[PlayerHealth] Vie à 0, appel de Die()");
+            Die();
+        }
     }
 
     /// <summary>
@@ -88,23 +117,41 @@ public class PlayerHealth : MonoBehaviour, iDamageable
     }
 
     /// <summary>
-    /// Réinitialise complètement la santé
+    /// Réinitialise complètement la santé et l'état du joueur
     /// </summary>
     public void ResetHealth()
     {
         currentHealth = maxHealth;
         isDead = false;
+        lastDamageTime = 0f;
+        isInvincible = false;
+        
         UpdateHealthUI();
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        
+        Debug.Log("[PlayerHealth] Health reset to full");
     }
 
     private void Die()
     {
         if (isDead) return;
         
+        Debug.Log("[PlayerHealth] Début de la séquence de mort");
         isDead = true;
-        OnDeath?.Invoke();
         
+        // Désactiver les composants du joueur
+        if (playerController != null)
+            playerController.enabled = false;
+        
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.simulated = false;
+            playerRigidbody.linearVelocity = Vector2.zero;
+        }
+        
+        if (playerCollider != null)
+            playerCollider.enabled = false;
+
         // Effets
         if (deathEffectPrefab) 
             Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
@@ -112,19 +159,29 @@ public class PlayerHealth : MonoBehaviour, iDamageable
         if (deathSound && audioSource) 
             audioSource.PlayOneShot(deathSound);
 
-        // Désactiver le joueur temporairement
-        var collider = GetComponent<Collider2D>();
-        if (collider != null) collider.enabled = false;
-        
-        var rigidbody = GetComponent<Rigidbody2D>();
-        if (rigidbody != null) rigidbody.simulated = false;
-        
-        // Désactiver les scripts de contrôle
-        var playerController = GetComponent<PlayerController>();
-        if (playerController != null) playerController.enabled = false;
+        // Sauvegarder la position de mort
+        lastPosition = transform.position;
 
-        // Respawn au dernier checkpoint
-        CheckpointManager.Instance.RespawnPlayer();
+        // Vérifier si le CheckpointManager existe
+        if (CheckpointManager.Instance == null)
+        {
+            Debug.LogError("[PlayerHealth] ERREUR CRITIQUE: CheckpointManager.Instance est null!");
+            return;
+        }
+
+        Debug.Log("[PlayerHealth] CheckpointManager trouvé, appel du respawn");
+        
+        // Appeler le respawn après un court délai
+        Invoke("CallRespawn", deathDelay);
+    }
+
+    private void CallRespawn()
+    {
+        if (CheckpointManager.Instance != null)
+        {
+            Debug.Log("[PlayerHealth] Appel effectif du respawn");
+            CheckpointManager.Instance.RespawnPlayer();
+        }
     }
 
     // Méthodes d'effets visuels
@@ -164,10 +221,8 @@ public class PlayerHealth : MonoBehaviour, iDamageable
 
     public void Damage(int damageAmount)
     {
-        if (!isInvincible)
-        {
-            TakeDamage(damageAmount);
-        }
+        Debug.Log($"[PlayerHealth] Méthode Damage appelée avec {damageAmount} dégâts");
+        TakeDamage(damageAmount);
     }
 
     public void StartInvincibility()
