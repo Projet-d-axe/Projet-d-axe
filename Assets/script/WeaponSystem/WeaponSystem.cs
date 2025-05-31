@@ -51,6 +51,8 @@ public class WeaponSystem : MonoBehaviour
     public AudioClip shootSound;
     public AudioClip reloadSound;
     [Range(0,1)] public float volume = 0.7f;
+    public bool applyCameraShake = false;
+    public float cameraShakeDuration = 0.1f;
 
     // État interne
     private int currentAmmo;
@@ -244,6 +246,7 @@ public class WeaponSystem : MonoBehaviour
     {
         if (weaponType == WeaponType.AOE) ApplyAOEEffect();
         if (recoilForce > 0) ApplyRecoil();
+        if (applyCameraShake) ApplyCameraShake();
     }
 
     void ApplyAOEEffect()
@@ -264,12 +267,17 @@ public class WeaponSystem : MonoBehaviour
     void ApplyRecoil()
     {
         if (playerRb == null || recoilForce <= 0) return;
-        
         Vector2 recoilDirection = -GetShootDirection() * recoilForce;
         playerRb.AddForce(recoilDirection, ForceMode2D.Impulse);
-        
+    }
+
+    void ApplyCameraShake()
+    {
         CameraController cameraController = Camera.main?.GetComponent<CameraController>();
-        cameraController?.Shake(0.1f);
+        if (cameraController != null)
+        {
+            cameraController.Shake(cameraShakeDuration);
+        }
     }
 
     Vector2 GetShootDirection()

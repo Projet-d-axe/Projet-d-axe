@@ -11,12 +11,6 @@ public class Bullet : MonoBehaviour, iDamageable
     }
 
     private float timer;
-    private ObjectPool pool;
-
-    public void SetPool(ObjectPool poolRef)
-    {
-        pool = poolRef;
-    }
 
     void OnEnable()
     {
@@ -57,9 +51,6 @@ public class Bullet : MonoBehaviour, iDamageable
     void Despawn()
     {
         Debug.Log("[Bullet] Bullet despawned");
-        if (pool != null)
-            pool.ReturnToPool(gameObject);
-        else
-            Destroy(gameObject);
+        Destroy(gameObject);
     }
 }

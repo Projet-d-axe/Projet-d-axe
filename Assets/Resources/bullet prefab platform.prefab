@@ -175,6 +175,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41f5d314a2dba334badfbd42f0ea75ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  freezeDuration: 3
+  freezeDuration: 1
   platformPrefab: {fileID: 8414012513915395311, guid: a1fc3d7fc3151cb4697d412b144ffa03, type: 3}
   damage: 1
