@@ -2828,6 +2828,37 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &197987984
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 197987985}
+  m_Layer: 0
+  m_Name: PatrolBirdB
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &197987985
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 197987984}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -105.23, y: -24.693853, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &201032447
 GameObject:
   m_ObjectHideFlags: 0
@@ -7774,6 +7805,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5505660878233666151, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
+      propertyPath: m_Constraints
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5505660878233666151, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
       propertyPath: m_GravityScale
       value: 0
       objectReference: {fileID: 0}
@@ -7791,7 +7826,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5877189301969276344, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -24.56
+      value: -24.39
       objectReference: {fileID: 0}
     - target: {fileID: 5877189301969276344, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
       propertyPath: m_LocalPosition.z
@@ -7828,11 +7863,19 @@ PrefabInstance:
     - target: {fileID: 8676528169860003423, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
       propertyPath: enemyData
       value: 
-      objectReference: {fileID: 11400000, guid: c103f9857c295eb46b27534e6012e6ce, type: 2}
+      objectReference: {fileID: 11400000, guid: 32a458c3d705e7245a4bcb579bf38e5f, type: 2}
     - target: {fileID: 8676528169860003423, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
       propertyPath: damageableLayer.m_Bits
       value: 4352
       objectReference: {fileID: 0}
+    - target: {fileID: 8676528169860003423, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
+      propertyPath: 'patrolPoints.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1259554370}
+    - target: {fileID: 8676528169860003423, guid: 7fa863a9f39b46c4d805eb86e9008e22, type: 3}
+      propertyPath: 'patrolPoints.Array.data[1]'
+      value: 
+      objectReference: {fileID: 197987985}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -33543,6 +33586,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1259554369
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1259554370}
+  m_Layer: 0
+  m_Name: PatrolBirdA
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1259554370
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259554369}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -99.75, y: -24.693853, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1259824480
 GameObject:
   m_ObjectHideFlags: 0
@@ -46876,7 +46950,6 @@ SceneRoots:
   - {fileID: 1291980682}
   - {fileID: 1221035370}
   - {fileID: 378259387}
-  - {fileID: 633854414}
   - {fileID: 1035905785340233080}
   - {fileID: 1672430693}
   - {fileID: 466766864}
@@ -46919,3 +46992,6 @@ SceneRoots:
   - {fileID: 1255542778}
   - {fileID: 1264187923}
   - {fileID: 201032449}
+  - {fileID: 633854414}
+  - {fileID: 1259554370}
+  - {fileID: 197987985}
