@@ -21,7 +21,8 @@ public class EnemyBase : MonoBehaviour, iDamageable
     public PlayerDetectedState playerDetectedState;
     public AttackState attackState;
 
-
+    //used for enemies with reaction zones
+    public bool chase;
 
     private NavMeshAgent agent;
     private Collider enemyCollider;
@@ -31,6 +32,8 @@ public class EnemyBase : MonoBehaviour, iDamageable
     public bool canAttack = true;
 
     public Transform[] patrolPoints;
+    public GameObject chaseArea;
+    
 
 
     private void Awake()
@@ -46,6 +49,12 @@ public class EnemyBase : MonoBehaviour, iDamageable
     {
         player = GameObject.FindGameObjectWithTag("Player");
         rb = GetComponent<Rigidbody2D>();
+
+        if (enemyData.eType == EnemyType.Flying)
+        {
+            ChaseArea cA = Instantiate(chaseArea, transform.position, Quaternion.identity).GetComponent<ChaseArea>();
+            cA.SetRadiusToDetectionRange(enemyData.detectionRange);
+        }
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -62,16 +71,24 @@ public class EnemyBase : MonoBehaviour, iDamageable
 
     public bool CheckForObstacles()
     {
-        RaycastHit2D hit = Physics2D.Raycast(edgeDetect.position, Vector2.down, enemyData.edgeDetection, ground);
-        RaycastHit2D wallHit = Physics2D.Raycast(edgeDetect.position, orientX == 1 ? Vector2.right : Vector2.left, enemyData.wallDetection, wall);
-        if (hit.collider == null || wallHit.collider == true)
+        if (enemyData.eType != EnemyType.Flying)
         {
-            Debug.Log($"hit collider response : {hit.collider}");
-            return true;
+            RaycastHit2D hit = Physics2D.Raycast(edgeDetect.position, Vector2.down, enemyData.edgeDetection, ground);
+            RaycastHit2D wallHit = Physics2D.Raycast(edgeDetect.position, orientX == 1 ? Vector2.right : Vector2.left, enemyData.wallDetection, wall);
+            if (hit.collider == null || wallHit.collider == true)
+            {
+                Debug.Log($"hit collider response : {hit.collider}");
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
+
         else
         {
-            return false;
+            return false ;
         }
     }
 

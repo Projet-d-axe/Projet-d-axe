@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EnemyAttackZone : MonoBehaviour
 {
-    private Collider2D collider;
+
     private float lifeTime = 0.5f;
     private bool hasDealtDamaged;
     public int damage;
@@ -11,7 +11,6 @@ public class EnemyAttackZone : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        collider = GetComponent<Collider2D>();
         hasDealtDamaged = false;
 
         Debug.Log("Damage Area Spawned");
