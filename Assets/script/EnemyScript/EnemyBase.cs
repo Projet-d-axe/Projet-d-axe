@@ -53,7 +53,6 @@ public class EnemyBase : MonoBehaviour, iDamageable
         if (enemyData.eType == EnemyType.Flying)
         {
             ChaseArea cA = Instantiate(chaseArea, transform.position, Quaternion.identity).GetComponent<ChaseArea>();
-            cA.transform.parent = gameObject.transform;
             cA.SetRadiusToDetectionRange(enemyData.detectionRange);
         }
     }
@@ -123,7 +122,10 @@ public class EnemyBase : MonoBehaviour, iDamageable
         Debug.Log("Shooting");
     }
 
-   
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawRay(edgeDetect.position, (orientX == 1 ? Vector2.right : Vector2.left) * enemyData.detectionRange);
+    }
 
     public void Corroutine1()
     {

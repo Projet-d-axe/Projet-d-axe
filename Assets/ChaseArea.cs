@@ -8,7 +8,6 @@ public class ChaseArea : MonoBehaviour
     void Start()
     {
         CC2D = GetComponent<CircleCollider2D>();
-        CC2D.isTrigger = true;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

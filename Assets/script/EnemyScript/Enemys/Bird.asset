@@ -15,7 +15,7 @@ MonoBehaviour:
   enemyName: Bird
   eType: 2
   mType: 1
-  pv: 97
+  pv: 100
   iFrameDuration: 0.5
   damage: 10
   attackCooldown: 0
@@ -23,7 +23,7 @@ MonoBehaviour:
   attackSpeed: 1
   knockbackAngle: {x: 0, y: 0}
   knockbackForce: 0
-  detectionRange: 5
+  detectionRange: 10
   playerDetectedWaitTime: 1
   forgetRange: 15
   canForget: 0

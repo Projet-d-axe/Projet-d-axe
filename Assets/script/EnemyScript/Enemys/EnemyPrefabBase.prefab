@@ -118,14 +118,9 @@ MonoBehaviour:
   damageableLayer:
     serializedVersion: 2
     m_Bits: 256
-  chase: 0
   orientX: 1
   stateTime: 0
   canAttack: 1
-  patrolPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  chaseArea: {fileID: 4745223487029421162, guid: 6b80c463b6a814f41b99056c041d5b75, type: 3}
 --- !u!50 &5505660878233666151
 Rigidbody2D:
   serializedVersion: 5
