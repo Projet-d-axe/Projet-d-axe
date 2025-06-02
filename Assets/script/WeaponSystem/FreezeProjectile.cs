@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class FreezeProjectile : MonoBehaviour
 {
@@ -6,13 +7,6 @@ public class FreezeProjectile : MonoBehaviour
     public float freezeDuration = 3f; // Durée du gel modifiable dans l'inspector
     public GameObject platformPrefab;
     public int damage = 1;
-
-    private ObjectPool pool;
-
-    public void SetPool(ObjectPool poolRef)
-    {
-        pool = poolRef;
-    }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
@@ -22,37 +16,57 @@ public class FreezeProjectile : MonoBehaviour
         EnemyBase enemy = collision.GetComponent<EnemyBase>();
         if (enemy != null)
         {
-            // Obtenir ou ajouter le composant FreezeEffect
-            FreezeEffect freezeEffect = enemy.GetComponent<FreezeEffect>();
-            if (freezeEffect == null)
+            // Vérifier si l'ennemi a plus de 1 PV avant d'infliger des dégâts
+            if (enemy.enemyData.pv > 1)
             {
-                freezeEffect = enemy.gameObject.AddComponent<FreezeEffect>();
-            }
-
-            // Appliquer l'effet de gel
-            freezeEffect.Freeze(freezeDuration);
-
-            // Infliger des dégâts
-            enemy.Damage(damage);
-
-            // Si l'ennemi est à 1 PV ou moins après les dégâts, le transformer en plateforme
-            if (enemy.enemyData.pv <= 1 && platformPrefab != null)
-            {
-                Vector3 enemyPos = enemy.transform.position;
-                Destroy(enemy.gameObject);
-                GameObject platform = Instantiate(platformPrefab, enemyPos, Quaternion.identity);
-                Platform platformScript = platform.GetComponent<Platform>();
-                if (platformScript != null)
+                enemy.Damage(damage);
+                // Appliquer l'effet de gel normal
+                FreezeEffect freezeEffect = enemy.GetComponent<FreezeEffect>();
+                if (freezeEffect == null)
                 {
-                    platformScript.Initialize(freezeDuration);
+                    freezeEffect = enemy.gameObject.AddComponent<FreezeEffect>();
                 }
+                freezeEffect.Freeze(freezeDuration);
+            }
+            // Si l'ennemi est à 1 PV, le transformer en plateforme
+            else if (enemy.enemyData.pv == 1 && platformPrefab != null)
+            {
+                StartCoroutine(TransformIntoTemporaryPlatform(enemy));
             }
         }
 
         // Détruire le projectile
-        if (pool != null)
-            pool.ReturnToPool(gameObject);
-        else
-            Destroy(gameObject);
+        Destroy(gameObject);
+    }
+
+    private IEnumerator TransformIntoTemporaryPlatform(EnemyBase enemy)
+    {
+        Vector3 enemyPos = enemy.transform.position;
+        
+        // Désactiver l'ennemi temporairement
+        enemy.gameObject.SetActive(false);
+
+        // Créer la plateforme
+        GameObject platform = Instantiate(platformPrefab, enemyPos, Quaternion.identity);
+        Platform platformScript = platform.GetComponent<Platform>();
+        if (platformScript != null)
+        {
+            platformScript.Initialize(freezeDuration * 2);
+        }
+
+        // Attendre la durée du gel
+        yield return new WaitForSeconds(freezeDuration * 2);
+
+        // Détruire la plateforme si elle existe encore
+        if (platform != null)
+        {
+            Destroy(platform);
+        }
+
+        // Réactiver l'ennemi
+        if (enemy != null)
+        {
+            enemy.gameObject.SetActive(true);
+        }
     }
 }

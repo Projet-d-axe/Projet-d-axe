@@ -385,4 +385,46 @@ public class PlayerController : MonoBehaviour
     {
 
     }
+
+    private void OnEnable()
+    {
+        Debug.Log("[PlayerController] Controller activé, réinitialisation de l'état");
+        ResetState();
+    }
+
+    public void ResetState()
+    {
+        Debug.Log("[PlayerController] Réinitialisation de l'état du joueur");
+        
+        // Réinitialiser les variables de mouvement
+        moveInput = 0;
+        xSpeed = 0;
+        ySpeed = 0;
+        isRolling = false;
+        isCrouching = false;
+        isFastFalling = false;
+        isAiming = false;
+        
+        // Réinitialiser le Rigidbody
+        if (rb != null)
+        {
+            rb.simulated = true;
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
+        
+        // Réinitialiser le collider
+        if (col != null)
+        {
+            col.enabled = true;
+            col.size = originalColliderSize;
+            col.offset = originalColliderOffset;
+        }
+
+        // Réinitialiser les compteurs de saut
+        jumpCount = 0;
+        jumpBufferCounter = 0;
+        
+        Debug.Log("[PlayerController] État réinitialisé avec succès");
+    }
 }

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6577b085a78ae6f46ad0cd8fb1a65705, type: 3}
   m_Name: Wolf
   m_EditorClassIdentifier: 
-  enemyName: Wolf
+  enemyName: 
   eType: 0
-  mType: 2
-  pv: -4
+  mType: 1
+  pv: -5
   iFrameDuration: 0.5
   damage: 20
   attackCooldown: 1
