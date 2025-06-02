@@ -1,0 +1,611 @@
+fileFormatVersion: 2
+guid: 99e9f0d5d68f6cf4eb84dc6c3c1a31ed
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4504535718299174208
+    second: Tilset_bloc_0
+  - first:
+      213: 2328876311195971348
+    second: Tilset_bloc_1
+  - first:
+      213: -840407955757584395
+    second: Tilset_bloc_2
+  - first:
+      213: 5518824121518185438
+    second: Tilset_bloc_3
+  - first:
+      213: 2688646542405040747
+    second: Tilset_bloc_4
+  - first:
+      213: 5079155327696030570
+    second: Tilset_bloc_5
+  - first:
+      213: -1782585179682296559
+    second: Tilset_bloc_6
+  - first:
+      213: 2147507983620712056
+    second: Tilset_bloc_7
+  - first:
+      213: 4163028594576912557
+    second: Tilset_bloc_8
+  - first:
+      213: 5828477279547726928
+    second: Tilset_bloc_9
+  - first:
+      213: 4655681784315074485
+    second: Tilset_bloc_10
+  - first:
+      213: 6241626674255501902
+    second: Tilset_bloc_11
+  - first:
+      213: 5910573882914312904
+    second: Tilset_bloc_12
+  - first:
+      213: -6354897437299268817
+    second: Tilset_bloc_13
+  - first:
+      213: 1979265008359297918
+    second: Tilset_bloc_14
+  - first:
+      213: -306591663822741093
+    second: Tilset_bloc_15
+  - first:
+      213: -136408459251895031
+    second: Tilset_bloc_16
+  - first:
+      213: -27002808595849701
+    second: Tilset_bloc_17
+  - first:
+      213: -2040815800547803818
+    second: Tilset_bloc_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 178
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tilset_bloc_0
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 505
+        width: 183
+        height: 182
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0450847ae53538e30800000000000000
+      internalID: 4504535718299174208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_1
+      rect:
+        serializedVersion: 2
+        x: 301
+        y: 499
+        width: 183
+        height: 195
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41f68a68aa4d15020800000000000000
+      internalID: 2328876311195971348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_2
+      rect:
+        serializedVersion: 2
+        x: 561
+        y: 505
+        width: 183
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ff28aaba654654f0800000000000000
+      internalID: -840407955757584395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_3
+      rect:
+        serializedVersion: 2
+        x: 814
+        y: 505
+        width: 183
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edbd2fc6c4dc69c40800000000000000
+      internalID: 5518824121518185438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_4
+      rect:
+        serializedVersion: 2
+        x: 1057
+        y: 499
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6a72a609cdff4520800000000000000
+      internalID: 2688646542405040747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_5
+      rect:
+        serializedVersion: 2
+        x: 1266
+        y: 500
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6bca5a2cd8cc7640800000000000000
+      internalID: 5079155327696030570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_6
+      rect:
+        serializedVersion: 2
+        x: 1474
+        y: 505
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11d292f393cf247e0800000000000000
+      internalID: -1782585179682296559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_7
+      rect:
+        serializedVersion: 2
+        x: 1685
+        y: 505
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8762704122b7dcd10800000000000000
+      internalID: 2147507983620712056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_8
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 288
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da0fc89337c06c930800000000000000
+      internalID: 4163028594576912557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_9
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 289
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05c90e48439e2e050800000000000000
+      internalID: 5828477279547726928
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_10
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 282
+        width: 111
+        height: 181
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b75b5d7aed4c9040800000000000000
+      internalID: 4655681784315074485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_11
+      rect:
+        serializedVersion: 2
+        x: 728
+        y: 282
+        width: 104
+        height: 173
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4a1a930466be9650800000000000000
+      internalID: 6241626674255501902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_12
+      rect:
+        serializedVersion: 2
+        x: 929
+        y: 282
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c21fc581a3960250800000000000000
+      internalID: 5910573882914312904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_13
+      rect:
+        serializedVersion: 2
+        x: 1185
+        y: 282
+        width: 195
+        height: 195
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f23acb1537edec7a0800000000000000
+      internalID: -6354897437299268817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_14
+      rect:
+        serializedVersion: 2
+        x: 1459
+        y: 281
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e73dd9bd903c77b10800000000000000
+      internalID: 1979265008359297918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_15
+      rect:
+        serializedVersion: 2
+        x: 1696
+        y: 281
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b91efb29184cebbf0800000000000000
+      internalID: -306591663822741093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_16
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 57
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 905bee1aa316b1ef0800000000000000
+      internalID: -136408459251895031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_17
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 57
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1ed4b1b61110aff0800000000000000
+      internalID: -27002808595849701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tilset_bloc_18
+      rect:
+        serializedVersion: 2
+        x: 602
+        y: 57
+        width: 178
+        height: 180
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65df75497d09da3e0800000000000000
+      internalID: -2040815800547803818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 21a0c49c7ed19024b9def69e8eb94e0f
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Tilset_bloc_0: 4504535718299174208
+      Tilset_bloc_1: 2328876311195971348
+      Tilset_bloc_10: 4655681784315074485
+      Tilset_bloc_11: 6241626674255501902
+      Tilset_bloc_12: 5910573882914312904
+      Tilset_bloc_13: -6354897437299268817
+      Tilset_bloc_14: 1979265008359297918
+      Tilset_bloc_15: -306591663822741093
+      Tilset_bloc_16: -136408459251895031
+      Tilset_bloc_17: -27002808595849701
+      Tilset_bloc_18: -2040815800547803818
+      Tilset_bloc_2: -840407955757584395
+      Tilset_bloc_3: 5518824121518185438
+      Tilset_bloc_4: 2688646542405040747
+      Tilset_bloc_5: 5079155327696030570
+      Tilset_bloc_6: -1782585179682296559
+      Tilset_bloc_7: 2147507983620712056
+      Tilset_bloc_8: 4163028594576912557
+      Tilset_bloc_9: 5828477279547726928
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
