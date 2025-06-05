@@ -15,17 +15,17 @@ MonoBehaviour:
   enemyName: Wolf
   eType: 0
   mType: 1
-  pv: -5
-  iFrameDuration: 0.5
+  pv: 20
+  iFrameDuration: 0
   damage: 20
   attackCooldown: 1
   attackRange: 0.2
   attackSpeed: 10
   knockbackAngle: {x: 2, y: 1}
   knockbackForce: 5
-  detectionRange: 5
-  playerDetectedWaitTime: 1
-  forgetRange: 7
+  detectionRange: 10
+  playerDetectedWaitTime: 0.5
+  forgetRange: 12
   canForget: 0
   edgeDetection: 1.5
   wallDetection: 0.1

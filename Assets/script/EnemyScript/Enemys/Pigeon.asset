@@ -16,15 +16,15 @@ MonoBehaviour:
   eType: 2
   mType: 1
   pv: 20
-  iFrameDuration: 0.5
+  iFrameDuration: 0
   damage: 10
-  attackCooldown: 1
+  attackCooldown: 1.5
   attackRange: 2
-  attackSpeed: 1
+  attackSpeed: 5
   knockbackAngle: {x: 0, y: 0}
   knockbackForce: 0
   detectionRange: 5
-  playerDetectedWaitTime: 1
+  playerDetectedWaitTime: 0
   forgetRange: 15
   canForget: 0
   edgeDetection: 0
