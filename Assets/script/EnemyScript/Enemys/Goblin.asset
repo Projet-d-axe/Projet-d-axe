@@ -15,17 +15,17 @@ MonoBehaviour:
   enemyName: Goblin
   eType: 1
   mType: 0
-  pv: -1
-  iFrameDuration: 0.5
-  damage: 0
-  attackCooldown: 1
+  pv: 5
+  iFrameDuration: 0
+  damage: 15
+  attackCooldown: 1.5
   attackRange: 2
   attackSpeed: 5
   knockbackAngle: {x: 0, y: 0}
   knockbackForce: 0
-  detectionRange: 10
-  playerDetectedWaitTime: 1
-  forgetRange: 15
+  detectionRange: 25
+  playerDetectedWaitTime: 0
+  forgetRange: 30
   canForget: 0
   edgeDetection: 0
   wallDetection: 0

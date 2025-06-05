@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6577b085a78ae6f46ad0cd8fb1a65705, type: 3}
+  m_Name: Pigeon 2
+  m_EditorClassIdentifier: 
+  enemyName: Pigeon
+  eType: 2
+  mType: 0
+  pv: 19
+  iFrameDuration: 0
+  damage: 10
+  attackCooldown: 1
+  attackRange: 2
+  attackSpeed: 5
+  knockbackAngle: {x: 0, y: 0}
+  knockbackForce: 0
+  detectionRange: 5
+  playerDetectedWaitTime: 1
+  forgetRange: 15
+  canForget: 0
+  edgeDetection: 0
+  wallDetection: 0
+  canFallOffLedges: 0
+  speed: 3.5
+  prefab: {fileID: 0}
+  deathObject: {fileID: 0}
+  deathSfx: {fileID: 0}
+  attackObject: {fileID: 4640801137598475924, guid: 27b398b6f746e584c908b00e2b7b4331, type: 3}
